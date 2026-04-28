@@ -1,5 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 
 // Public Pages
@@ -22,8 +21,6 @@ import AdminSettings from './pages/admin/AdminSettings'
 import StudentDashboard from './pages/student/StudentDashboard'
 import StudentDues from './pages/student/StudentDues'
 import StudentDueDetails from './pages/student/StudentDueDetails'
-
-const queryClient = new QueryClient()
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth()
@@ -139,15 +136,11 @@ function AppRoutes() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BrowserRouter>
-          <div className="min-h-screen bg-gray-50">
-            <AppRoutes />
-          </div>
-        </BrowserRouter>
-      </AuthProvider>
-    </QueryClientProvider>
+    <AuthProvider>
+      <div className="min-h-screen bg-gray-50">
+        <AppRoutes />
+      </div>
+    </AuthProvider>
   )
 }
 

@@ -7,7 +7,7 @@ export const useAuth = () => useContext(AuthContext)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     // Check active session
@@ -15,11 +15,9 @@ export function AuthProvider({ children }) {
       if (session?.user) {
         fetchUserRole(session.user.id).then((role) => {
           setUser({ ...session.user, role })
-          setLoading(false)
         })
-      } else {
-        setLoading(false)
       }
+      setLoading(false)
     })
 
     // Listen for auth changes
@@ -69,7 +67,6 @@ export function AuthProvider({ children }) {
       if (error) throw error
 
       if (data.user) {
-        // Create organization and admin user record
         const { error: orgError } = await supabase.rpc('create_organization', {
           p_name: churchName,
           p_admin_id: data.user.id,
