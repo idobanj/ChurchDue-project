@@ -10,47 +10,62 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    // Check active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        fetchUserRole(session.user.id).then((role) => {
-          setUser({ ...session.user, role })
-        })
-      }
-      setLoading(false)
-    })
+    let mounted = true
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        const role = await fetchUserRole(session.user.id)
-        setUser({ ...session.user, role })
-      } else {
-        setUser(null)
-      }
-      setLoading(false)
-    })
+    async function fetchUserProfile(userId) {
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('id, role, organization_id, full_name, email')
+          .eq('id', userId)
+          .single()
 
-    return () => subscription.unsubscribe()
-  }, [])
-
-  async function fetchUserRole(userId) {
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', userId)
-        .single()
-
-      if (error || !data) {
+        if (error || !data) {
+          return null
+        }
+        return data
+      } catch {
         return null
       }
-      return data.role
-    } catch (err) {
-      console.error('Error fetching user role:', err)
-      return null
     }
-  }
+
+    async function initAuth() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+
+        if (mounted && session?.user) {
+          const profile = await fetchUserProfile(session.user.id)
+          if (mounted) {
+            setUser(profile || { id: session.user.id, email: session.user.email })
+          }
+        }
+      } catch (err) {
+        console.warn('Supabase connection warning:', err)
+      } finally {
+        if (mounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    initAuth()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user && mounted) {
+        const profile = await fetchUserProfile(session.user.id)
+        if (mounted) {
+          setUser(profile || { id: session.user.id, email: session.user.email })
+        }
+      } else if (mounted) {
+        setUser(null)
+      }
+    })
+
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
+  }, [])
 
   async function signUp(email, password, fullName, churchName) {
     try {
@@ -97,8 +112,9 @@ export function AuthProvider({ children }) {
   }
 
   async function signOut() {
-    const { error } = await supabase.auth.signOut()
-    if (error) {
+    try {
+      await supabase.auth.signOut()
+    } catch (error) {
       console.error('Error signing out:', error)
     }
     setUser(null)
@@ -107,7 +123,7 @@ export function AuthProvider({ children }) {
   async function resetPassword(email) {
     try {
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/forgot-password`,
+        redirectTo: `${window.location.origin}/reset-password`,
       })
 
       if (error) throw error

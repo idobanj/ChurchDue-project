@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../services/supabaseClient'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function RefundModal({ due, totalPaid, onClose }) {
+  const { user } = useAuth()
   const queryClient = useQueryClient()
   const [amount, setAmount] = useState('')
   const [reason, setReason] = useState('')
@@ -49,10 +51,16 @@ export default function RefundModal({ due, totalPaid, onClose }) {
 
     setLoading(true)
 
+    if (!user?.id || !user?.organization_id) {
+      setError('Unable to submit refund request. Please sign in again.')
+      setLoading(false)
+      return
+    }
+
     createRefund.mutate({
       payment_id: due.payments?.[0]?.id, // Get appropriate payment ID
-      student_id: supabase.auth.user()?.id,
-      organization_id: 'org-id', // Replace with actual org ID
+      student_id: user.id,
+      organization_id: user.organization_id,
       amount: refundAmount,
       reason: reason.trim(),
       status: 'pending',

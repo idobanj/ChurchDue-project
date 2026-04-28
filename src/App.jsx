@@ -8,10 +8,12 @@ import AdminSignup from './pages/AdminSignup'
 import StudentLogin from './pages/StudentLogin'
 import StudentSignup from './pages/StudentSignup'
 import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard'
 import DuesManagement from './pages/admin/DuesManagement'
+import AdminDueDetails from './pages/admin/AdminDueDetails'
 import StudentsPage from './pages/admin/StudentsPage'
 import PaymentsPage from './pages/admin/PaymentsPage'
 import RefundRequests from './pages/admin/RefundRequests'
@@ -54,6 +56,7 @@ function AppRoutes() {
       <Route path="/student/login" element={<StudentLogin />} />
       <Route path="/join/:slug" element={<StudentSignup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Admin Routes */}
       <Route
@@ -69,6 +72,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={['admin']}>
             <DuesManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/dues/:id"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminDueDetails />
           </ProtectedRoute>
         }
       />

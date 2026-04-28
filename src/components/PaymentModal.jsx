@@ -5,8 +5,7 @@ export default function PaymentModal({ due, onClose }) {
   const [amount, setAmount] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
-  const maxAmount = due.amount
+  const [maxAmount, setMaxAmount] = useState(due.amount)
   const minAmount = 100 // Minimum payment amount
 
   async function handleSubmit(e) {
@@ -28,15 +27,34 @@ export default function PaymentModal({ due, onClose }) {
     setLoading(true)
 
     try {
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      if (authError || !authData?.user) {
+        throw new Error('Please sign in again to continue.')
+      }
+      const currentUser = authData.user
+      const { data: existingPayments } = await supabase
+        .from('payments')
+        .select('amount_paid')
+        .eq('due_id', due.id)
+        .eq('student_id', currentUser.id)
+
+      const alreadyPaid = existingPayments?.reduce((sum, payment) => sum + (payment.amount_paid || 0), 0) || 0
+      const remainingBalance = Math.max(due.amount - alreadyPaid, 0)
+      setMaxAmount(remainingBalance)
+
+      if (paymentAmount > remainingBalance) {
+        throw new Error(`Amount cannot exceed remaining balance of ₦${remainingBalance}`)
+      }
+
       // Initialize Paystack payment
       const handler = window.PaystackPop?.setup({
         key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
-        email: supabase.auth.user()?.email,
+        email: currentUser.email,
         amount: paymentAmount * 100, // Paystack expects amount in kobo
         currency: 'NGN',
         metadata: {
           due_id: due.id,
-          student_id: supabase.auth.user()?.id,
+          student_id: currentUser.id,
         },
         callback: async (response) => {
           // Verify payment on backend via webhook
@@ -45,7 +63,7 @@ export default function PaymentModal({ due, onClose }) {
             .from('payments')
             .insert({
               due_id: due.id,
-              student_id: supabase.auth.user()?.id,
+              student_id: currentUser.id,
               amount_paid: paymentAmount,
               paystack_reference: response.reference,
               status: 'pending', // Will be updated by webhook

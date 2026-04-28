@@ -5,15 +5,18 @@ import { supabase } from '../../services/supabaseClient'
 import StudentSidebar from '../../components/StudentSidebar'
 import PaymentModal from '../../components/PaymentModal'
 import RefundModal from '../../components/RefundModal'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function StudentDueDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [showRefundModal, setShowRefundModal] = useState(false)
 
   const { data: due, isLoading } = useQuery({
-    queryKey: ['due', id],
+    queryKey: ['due', id, user?.id, user?.organization_id],
+    enabled: Boolean(id && user?.id && user?.organization_id),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('dues')
@@ -26,16 +29,21 @@ export default function StudentDueDetails() {
           created_at,
           payments (
             id,
+            student_id,
             amount_paid,
             paid_at,
             status
           )
         `)
         .eq('id', id)
+        .eq('organization_id', user.organization_id)
         .single()
 
       if (error) throw error
-      return data
+      return {
+        ...data,
+        payments: data.payments?.filter((payment) => payment.student_id === user.id) || [],
+      }
     },
   })
 

@@ -1,9 +1,12 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../services/supabaseClient'
 import AdminSidebar from '../../components/AdminSidebar'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function DuesManagement() {
+  const { user } = useAuth()
   const queryClient = useQueryClient()
   const [showModal, setShowModal] = useState(false)
   const [editingDue, setEditingDue] = useState(null)
@@ -15,11 +18,13 @@ export default function DuesManagement() {
   })
 
   const { data: dues, isLoading } = useQuery({
-    queryKey: ['dues'],
+    queryKey: ['dues', user?.organization_id],
+    enabled: Boolean(user?.organization_id),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('dues')
         .select('*')
+        .eq('organization_id', user.organization_id)
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -102,7 +107,7 @@ export default function DuesManagement() {
     const dueData = {
       ...formData,
       amount: parseFloat(formData.amount),
-      organization_id: 'org-id-placeholder', // Will be replaced with actual org ID
+      organization_id: user.organization_id,
     }
 
     if (editingDue) {
@@ -176,7 +181,9 @@ export default function DuesManagement() {
                   <tr key={due.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <div>
-                        <p className="font-medium text-gray-900">{due.title}</p>
+                        <Link to={`/admin/dues/${due.id}`} className="font-medium text-gray-900 hover:text-primary-600">
+                          {due.title}
+                        </Link>
                         {due.description && (
                           <p className="text-sm text-gray-500 truncate max-w-md">{due.description}</p>
                         )}

@@ -4,8 +4,10 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../services/supabaseClient'
 import AdminSidebar from '../../components/AdminSidebar'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function AdminDashboard() {
+  const { user } = useAuth()
   const [stats, setStats] = useState({
     totalDues: 0,
     totalCollected: 0,
@@ -14,7 +16,8 @@ export default function AdminDashboard() {
   })
 
   const { data: recentPayments } = useQuery({
-    queryKey: ['recentPayments'],
+    queryKey: ['recentPayments', user?.organization_id],
+    enabled: Boolean(user?.organization_id),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('payments')
@@ -37,15 +40,18 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     async function fetchStats() {
+      if (!user?.organization_id) return
       // Fetch dues count
       const { count: duesCount } = await supabase
         .from('dues')
         .select('*', { head: true, count: 'exact' })
+        .eq('organization_id', user.organization_id)
 
       // Fetch students count
       const { count: studentsCount } = await supabase
         .from('users')
         .select('*', { head: true, count: 'exact' })
+        .eq('organization_id', user.organization_id)
         .eq('role', 'student')
 
       // Fetch payments sum
@@ -64,7 +70,7 @@ export default function AdminDashboard() {
     }
 
     fetchStats()
-  }, [])
+  }, [user?.organization_id])
 
   const chartData = [
     { name: 'Collected', amount: stats.totalCollected },

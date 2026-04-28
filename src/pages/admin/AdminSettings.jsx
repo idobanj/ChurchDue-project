@@ -2,22 +2,25 @@ import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../services/supabaseClient'
 import AdminSidebar from '../../components/AdminSidebar'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function AdminSettings() {
+  const { user } = useAuth()
   const [copySuccess, setCopySuccess] = useState(false)
   const [paystackConnected, setPaystackConnected] = useState(false)
 
   const { data: organization } = useQuery({
-    queryKey: ['organization'],
+    queryKey: ['organization', user?.organization_id],
+    enabled: Boolean(user?.organization_id),
     queryFn: async () => {
-      // This would fetch the actual organization data
-      // For now, returning placeholder
-      return {
-        id: 'org-id',
-        name: 'Church Name',
-        slug: 'church-slug',
-        paystack_connected: false,
-      }
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('id, name, slug, paystack_connected')
+        .eq('id', user.organization_id)
+        .single()
+
+      if (error) throw error
+      return data
     },
   })
 
@@ -27,7 +30,7 @@ export default function AdminSettings() {
     }
   }, [organization])
 
-  const inviteLink = `${window.location.origin}/join/${organization?.slug || 'church-slug'}`
+  const inviteLink = `${window.location.origin}/join/${organization?.slug || ''}`
 
   function handleCopyInvite() {
     navigator.clipboard.writeText(inviteLink)

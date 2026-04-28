@@ -4,14 +4,17 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../services/supabaseClient'
 import StudentSidebar from '../../components/StudentSidebar'
 import PaymentModal from '../../components/PaymentModal'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function StudentDues() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [selectedDue, setSelectedDue] = useState(null)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
 
   const { data: dues, isLoading } = useQuery({
-    queryKey: ['studentDues'],
+    queryKey: ['studentDues', user?.organization_id, user?.id],
+    enabled: Boolean(user?.organization_id && user?.id),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('dues')
@@ -22,9 +25,9 @@ export default function StudentDues() {
           amount,
           status,
           created_at,
-          payments (amount_paid)
+          payments!left (amount_paid, student_id)
         `)
-        .eq('organization_id', 'org-id')
+        .eq('organization_id', user.organization_id)
         .eq('status', 'active')
 
       if (error) throw error
@@ -33,7 +36,9 @@ export default function StudentDues() {
   })
 
   function getAmountPaid(due) {
-    return due.payments?.reduce((sum, p) => sum + (p.amount_paid || 0), 0) || 0
+    return due.payments
+      ?.filter((payment) => payment.student_id === user?.id)
+      .reduce((sum, p) => sum + (p.amount_paid || 0), 0) || 0
   }
 
   function getPaymentStatus(due) {

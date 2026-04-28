@@ -1,10 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../services/supabaseClient'
 import AdminSidebar from '../../components/AdminSidebar'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function StudentsPage() {
+  const { user } = useAuth()
   const { data: students, isLoading } = useQuery({
-    queryKey: ['students'],
+    queryKey: ['students', user?.organization_id],
+    enabled: Boolean(user?.organization_id),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('users')
@@ -16,6 +19,7 @@ export default function StudentsPage() {
           profile_picture_url,
           payments (amount_paid)
         `)
+        .eq('organization_id', user.organization_id)
         .eq('role', 'student')
 
       if (error) throw error

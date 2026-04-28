@@ -2,16 +2,19 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../services/supabaseClient'
 import StudentSidebar from '../../components/StudentSidebar'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function StudentDashboard() {
+  const { user } = useAuth()
   const { data: stats, isLoading } = useQuery({
-    queryKey: ['studentStats'],
+    queryKey: ['studentStats', user?.id, user?.organization_id],
+    enabled: Boolean(user?.id && user?.organization_id),
     queryFn: async () => {
       // Fetch student's payments
       const { data: payments } = await supabase
         .from('payments')
         .select('amount_paid, status')
-        .eq('student_id', 'current-user-id') // Replace with actual user ID
+        .eq('student_id', user.id)
 
       const totalPaid = payments?.reduce((sum, p) => sum + (p.amount_paid || 0), 0) || 0
 
@@ -19,7 +22,7 @@ export default function StudentDashboard() {
       const { data: dues } = await supabase
         .from('dues')
         .select('amount, status')
-        .eq('organization_id', 'org-id') // Replace with actual org ID
+        .eq('organization_id', user.organization_id)
 
       const totalDues = dues?.reduce((sum, d) => sum + (d.amount || 0), 0) || 0
 
@@ -33,7 +36,8 @@ export default function StudentDashboard() {
   })
 
   const { data: recentPayments } = useQuery({
-    queryKey: ['recentPayments'],
+    queryKey: ['recentPayments', user?.id],
+    enabled: Boolean(user?.id),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('payments')
@@ -43,7 +47,7 @@ export default function StudentDashboard() {
           paid_at,
           dues (title)
         `)
-        .eq('student_id', 'current-user-id')
+        .eq('student_id', user.id)
         .order('paid_at', { ascending: false })
         .limit(3)
 
