@@ -6,6 +6,18 @@
   body {
     @apply bg-gray-50 text-gray-900 antialiased dark:bg-gray-900 dark:text-gray-100;
   }
+
+  input,
+  textarea,
+  select {
+    @apply text-black placeholder-gray-500 dark:text-black dark:placeholder-gray-500;
+  }
+
+  input:not([type='checkbox']):not([type='radio']),
+  textarea,
+  select {
+    @apply bg-white dark:bg-white border-gray-300 dark:border-gray-300;
+  }
 }
 
 @layer components {
