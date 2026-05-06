@@ -34,28 +34,32 @@ export default function AdminSignup() {
     }
 
     setLoading(true)
+    try {
+      const { data, error } = await signUp(
+        formData.email,
+        formData.password,
+        formData.fullName,
+        formData.churchName
+      )
 
-    const { data, error } = await signUp(
-      formData.email,
-      formData.password,
-      formData.fullName,
-      formData.churchName
-    )
+      if (error) {
+        setError(error.message || 'An unexpected error occurred during signup')
+        setLoading(false)
+        return
+      }
 
-    if (error) {
-      setError(error.message)
+      if (data?.user) {
+        navigate('/admin/dashboard', {
+          state: { message: 'Account created successfully! Please check your email to verify your account.' }
+        })
+      } else {
+        setError('Account creation failed: No user data returned')
+        setLoading(false)
+      }
+    } catch (err) {
+      setError(err.message || 'An unexpected error occurred')
       setLoading(false)
-      return
     }
-
-    if (data?.user) {
-      // Check email and redirect
-      navigate('/admin/dashboard', {
-        state: { message: 'Account created successfully! Please check your email to verify your account.' }
-      })
-    }
-
-    setLoading(false)
   }
 
   return (

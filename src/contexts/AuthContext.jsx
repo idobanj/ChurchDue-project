@@ -69,7 +69,8 @@ export function AuthProvider({ children }) {
 
   async function signUp(email, password, fullName, churchName) {
     try {
-      const { data, error } = await supabase.auth.signUp({
+      console.log('Starting signup process for:', email)
+      const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -79,21 +80,30 @@ export function AuthProvider({ children }) {
         },
       })
 
-      if (error) throw error
+      if (authError) {
+        console.error('Auth SignUp Error:', authError)
+        throw authError
+      }
 
       if (data.user) {
+        console.log('Auth user created, calling create_organization RPC...')
         const { error: orgError } = await supabase.rpc('create_organization', {
           p_name: churchName,
           p_admin_id: data.user.id,
           p_admin_name: fullName,
         })
 
-        if (orgError) throw orgError
+        if (orgError) {
+          console.error('RPC create_organization Error:', orgError)
+          throw orgError
+        }
+        console.log('Organization created successfully')
       }
 
       return { data, error: null }
     } catch (error) {
-      return { data: null, error }
+      console.error('SignUp Process caught error:', error)
+      return { data: null, error: error instanceof Error ? error : { message: String(error) } }
     }
   }
 
