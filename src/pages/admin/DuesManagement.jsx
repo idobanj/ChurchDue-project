@@ -34,12 +34,16 @@ export default function DuesManagement() {
 
   const createDue = useMutation({
     mutationFn: async (dueData) => {
+      console.log('Attempting to create due with data:', dueData)
       const { data, error } = await supabase
         .from('dues')
         .insert(dueData)
         .select()
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase Insert Error:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
@@ -47,17 +51,25 @@ export default function DuesManagement() {
       setShowModal(false)
       resetForm()
     },
+    onError: (error) => {
+      console.error('Mutation Error:', error)
+      alert(`Failed to create due: ${error.message}`)
+    }
   })
 
   const updateDue = useMutation({
     mutationFn: async ({ id, ...dueData }) => {
+      console.log('Attempting to update due with id:', id, 'and data:', dueData)
       const { data, error } = await supabase
         .from('dues')
         .update(dueData)
         .eq('id', id)
         .select()
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase Update Error:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
@@ -65,6 +77,10 @@ export default function DuesManagement() {
       setShowModal(false)
       setEditingDue(null)
       resetForm()
+    },
+    onError: (error) => {
+      console.error('Update Mutation Error:', error)
+      alert(`Failed to update due: ${error.message}`)
     },
   })
 
@@ -104,6 +120,12 @@ export default function DuesManagement() {
 
   function handleSubmit(e) {
     e.preventDefault()
+
+    if (!user?.organization_id) {
+      alert('Error: No organization associated with your account. Please try logging out and in again, or check your user profile in the database.')
+      return
+    }
+
     const dueData = {
       ...formData,
       amount: parseFloat(formData.amount),
