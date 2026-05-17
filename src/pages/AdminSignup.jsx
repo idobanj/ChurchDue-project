@@ -21,18 +21,22 @@ export default function AdminSignup() {
 
   async function handleSubmit(e) {
     e.preventDefault()
+    console.log('AdminSignup: handleSubmit triggered')
     setError('')
 
     if (formData.password !== formData.confirmPassword) {
+      console.log('AdminSignup: Passwords do not match')
       setError('Passwords do not match')
       return
     }
 
     if (formData.password.length < 6) {
+      console.log('AdminSignup: Password too short')
       setError('Password must be at least 6 characters')
       return
     }
 
+    console.log('AdminSignup: Calling signUp function from useAuth...')
     setLoading(true)
     try {
       const { data, error } = await signUp(
@@ -42,6 +46,8 @@ export default function AdminSignup() {
         formData.churchName
       )
 
+      console.log('AdminSignup: signUp returned', { data, error })
+
       if (error) {
         setError(error.message || 'An unexpected error occurred during signup')
         setLoading(false)
@@ -49,6 +55,7 @@ export default function AdminSignup() {
       }
 
       if (data?.user) {
+        console.log('AdminSignup: User created, navigating to dashboard...')
         navigate('/admin/dashboard', {
           state: { message: 'Account created successfully! Please check your email to verify your account.' }
         })
@@ -57,6 +64,7 @@ export default function AdminSignup() {
         setLoading(false)
       }
     } catch (err) {
+      console.error('AdminSignup: Catch block triggered:', err)
       setError(err.message || 'An unexpected error occurred')
       setLoading(false)
     }

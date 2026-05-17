@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
-// import { AuthProvider } from './contexts/AuthContext'
+import { AuthProvider } from './contexts/AuthContext'
 import Landing from './pages/Landing'
 import AdminLogin from './pages/AdminLogin'
 import AdminSignup from './pages/AdminSignup'
@@ -8,6 +8,7 @@ import StudentSignup from './pages/StudentSignup'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import StudentJoin from './pages/StudentJoin'
+
 
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -66,9 +67,11 @@ function AppRoutes() {
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
-      <AppRoutes />
-    </div>
+    <AuthProvider>
+      <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+        <AppRoutes />
+      </div>
+    </AuthProvider>
   )
 }
 
