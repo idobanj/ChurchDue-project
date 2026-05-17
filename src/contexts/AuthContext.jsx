@@ -223,4 +223,145 @@ export function AuthProvider({ children }) {
   async function signUp(email, password, fullName, churchName) {
     try {
       console.log('[SIGN_UP_START] Signup process for:', email)
-      const { data, error: authError } = await Promise.race(
+      const { data, error: authError } = await Promise.race([
+        supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { full_name: fullName } },
+        }),
+        timeoutPromise(10000)
+      ])
+
+      if (authError) throw authError
+
+      if (data.user) {
+        const { data: orgData, error: orgError } = await Promise.race([
+          supabase.rpc('create_organization', {
+            p_name: churchName,
+            p_admin_id: data.user.id,
+            p_admin_name: fullName,
+          }),
+          timeoutPromise(10000)
+        ])
+
+        if (orgError) throw orgError
+
+        let organization_id = null;
+        if (typeof orgData === 'number') {
+          organization_id = orgData;
+        } else if (orgData && typeof orgData === 'object') {
+          organization_id = orgData.id || orgData.organization_id || orgData.org_id;
+        }
+
+        if (organization_id !== null) {
+          await Promise.race([
+            supabase
+              .from('users')
+              .insert({
+                id: data.user.id,
+                organization_id: organization_id,
+                full_name: fullName,
+                email: data.user.email,
+                role: 'admin',
+              }),
+            timeoutPromise(5000)
+          ])
+        }
+      }
+
+      return { data, error: null }
+    } catch (error) {
+      console.log('[SIGN_UP_EXCEPTION] Signup process error:', error)
+      return { data: null, error: error instanceof Error ? error : { message: String(error) } }
+    }
+  }
+
+  async function signIn(email, password) {
+    try {
+      console.log('[SIGN_IN_START] Sign in attempt for:', email)
+      const { data, error } = await Promise.race([
+        supabase.auth.signInWithPassword({ email, password }),
+        timeoutPromise(10000)
+      ])
+
+      if (error) throw error
+
+      // FIXED HERE: Replaced 'mounted' with 'isMounted.current' which works flawlessly across context methods
+      if (isMounted.current) {
+        const userId = data.user.id
+        
+        // This triggers initializeUser safely
+        const userData = await Promise.race([
+          supabase
+            .from('users')
+            .select('id, role, organization_id, full_name, email')
+            .eq('id', userId)
+            .limit(1),
+          timeoutPromise(5000)
+        ])
+
+        const profile = userData.data?.[0]
+
+        if (profile) {
+          const finalUser = {
+            ...profile,
+            email: data.user.email || profile.email || '',
+            full_name: data.user.user_metadata?.full_name || profile.full_name || '',
+            role: data.user.user_metadata?.role || profile.role || undefined
+          }
+          setUser(finalUser)
+        } else {
+          const userMetadata = data.user.user_metadata || {}
+          const fallbackUser = {
+            id: data.user.id,
+            email: data.user.email,
+            full_name: userMetadata.full_name || '',
+            role: userMetadata.role || undefined,
+            organization_id: userMetadata.organization_id || undefined
+          }
+          setUser(fallbackUser)
+        }
+      }
+
+      return { data, error: null }
+    } catch (error) {
+      console.log('[SIGN_IN_EXCEPTION] Sign in process error:', error)
+      return { data: null, error: error instanceof Error ? error : { message: String(error) } }
+    }
+  }
+
+  async function signOut() {
+    try {
+      await supabase.auth.signOut()
+    } catch (error) {
+      console.log('[SIGN_OUT_ERROR] Error signing out:', error)
+    }
+    setUser(null)
+  }
+
+  async function resetPassword(email) {
+    try {
+      const { data, error } = await Promise.race([
+        supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        }),
+        timeoutPromise(5000)
+      ])
+      if (error) throw error
+      return { data, error: null }
+    } catch (error) {
+      return { data: null, error }
+    }
+  }
+
+  const value = {
+    user,
+    loading,
+    signUp,
+    signIn,
+    signOut,
+    resetPassword,
+  }
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
