@@ -64,12 +64,12 @@ export function AuthProvider({children}) {
                         profile.full_name ||
                         session.user.user_metadata?.full_name ||
                         '',
-                    role: profile.role || session.user.user_metadata?.role,
+                    role: profile.role || session.user.user_metadata?.role || null,
                     // Map your database column (organisation_id) safely to frontend (organization_id)
                     organization_id:
                         profile.organisation_id ||
                         session.user.user_metadata?.organization_id ||
-                        session.user.user_metadata?.organisation_id,
+                        session.user.user_metadata?.organisation_id || null,
                 };
 
                 if (isMounted.current) {
@@ -87,16 +87,26 @@ export function AuthProvider({children}) {
                     id: session.user.id,
                     email: session.user.email,
                     full_name: userMetadata.full_name || '',
-                    role: userMetadata.role,
+                    role: userMetadata.role || null,
                     organization_id:
-                        userMetadata.organization_id ||
-                        userMetadata.organisation_id,
+                        (userMetadata.organization_id || userMetadata.organisation_id) || null,
                 };
+
+                // Log when critical fields are missing from fallback
                 if (isMounted.current) {
                     console.log(
                         '[REFRESH_USER_FALLBACK] Using token metadata:',
                         fallbackUser,
                     );
+
+                    // Warn if critical fields are missing
+                    if (!fallbackUser.role) {
+                        console.warn('[REFRESH_USER_WARNING] Role is missing from user metadata');
+                    }
+                    if (!fallbackUser.organization_id) {
+                        console.warn('[REFRESH_USER_WARNING] Organization ID is missing from user metadata');
+                    }
+
                     setUser(fallbackUser);
                 }
                 return fallbackUser;
