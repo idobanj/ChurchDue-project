@@ -50,6 +50,12 @@ export function AuthProvider({children}) {
 
             const profile = result?.data;
 
+            console.log(
+                '[REFRESH_USER_DEBUG] Database result error:',
+                result.error,
+            );
+            console.log('[REFRESH_USER_DEBUG] Row data returned:', result.data);
+
             if (profile) {
                 const combinedUser = {
                     id: session.user.id,
