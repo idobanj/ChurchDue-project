@@ -69,7 +69,7 @@ export function AuthProvider({children}) {
                     organization_id:
                         profile.organization_id ||
                         session.user.user_metadata?.organization_id ||
-                        session.user.user_metadata?.organisation_id || null,
+                        session.user.user_metadata?.organization_id || null,
                 };
 
                 if (isMounted.current) {
@@ -89,7 +89,7 @@ export function AuthProvider({children}) {
                     full_name: userMetadata.full_name || '',
                     role: userMetadata.role || null,
                     organization_id:
-                        (userMetadata.organization_id || userMetadata.organisation_id) || null,
+                        (userMetadata.organization_id || userMetadata.organization_id) || null,
                 };
 
                 // Log when critical fields are missing from fallback
@@ -198,7 +198,7 @@ export function AuthProvider({children}) {
                         orgData.id ||
                         orgData.organization_id ||
                         orgData.org_id ||
-                        orgData.organisation_id;
+                        orgData.organization_id;
                 }
 
                 if (organization_id !== null) {
