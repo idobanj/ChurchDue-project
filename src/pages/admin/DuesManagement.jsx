@@ -48,7 +48,8 @@ export default function DuesManagement() {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['dues'])
+      // FIXED: Matches your specific active cache array context
+      queryClient.invalidateQueries({ queryKey: ['dues', user?.organization_id] })
       setShowModal(false)
       resetForm()
     },
@@ -74,7 +75,8 @@ export default function DuesManagement() {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['dues'])
+      // FIXED: Matches your specific active cache array context
+      queryClient.invalidateQueries({ queryKey: ['dues', user?.organization_id] })
       setShowModal(false)
       setEditingDue(null)
       resetForm()
@@ -95,7 +97,8 @@ export default function DuesManagement() {
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['dues'])
+      // FIXED: Matches your specific active cache array context
+      queryClient.invalidateQueries({ queryKey: ['dues', user?.organization_id] })
     },
   })
 
@@ -122,8 +125,8 @@ export default function DuesManagement() {
   function handleSubmit(e) {
     e.preventDefault()
 
-    console.log('Form submit - user:', user) // Debug log
-    console.log('Form submit - formData:', formData) // Debug log
+    console.log('Form submit - user:', user) 
+    console.log('Form submit - formData:', formData) 
 
     if (!user) {
       alert('Error: No user found. Please log in again.')
@@ -132,11 +135,10 @@ export default function DuesManagement() {
 
     if (!user?.organization_id) {
       alert('Error: No organization associated with your account. Please try logging out and in again, or check your user profile in the database.')
-      console.log('User object missing organization_id:', user) // Debug log
+      console.log('User object missing organization_id:', user) 
       return
     }
 
-    // Validate amount
     const amountValue = parseFloat(formData.amount)
     if (isNaN(amountValue) || amountValue <= 0) {
       alert('Please enter a valid amount greater than 0')

@@ -15,301 +15,122 @@ export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({children}) {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true); // Default to true while checking initial session
 
     // Use a ref so ALL functions inside this component can check if it's safe to update state
     const isMounted = useRef(true);
 
+    // Reusable core function to pull profile records and combine them with Auth session info
+    const refreshUser = async (currentSession = null) => {
+        try {
+            let session = currentSession;
+            if (!session) {
+                const {data} = await supabase.auth.getSession();
+                session = data.session;
+            }
+
+            if (!session?.user) {
+                if (isMounted.current) setUser(null);
+                return null;
+            }
+
+            const userId = session.user.id;
+            console.log('[REFRESH_USER] Getting profile for:', userId);
+
+            // Fetch the profile record directly from public.users
+            const result = await Promise.race([
+                supabase
+                    .from('users')
+                    .select('id, role, organization_id, full_name, email')
+                    .eq('id', userId)
+                    .maybeSingle(), // Use maybeSingle to prevent array index confusion
+                timeoutPromise(5000),
+            ]);
+
+            const profile = result?.data;
+
+            if (profile) {
+                const combinedUser = {
+                    id: session.user.id,
+                    email: session.user.email || profile.email || '',
+                    full_name:
+                        profile.full_name ||
+                        session.user.user_metadata?.full_name ||
+                        '',
+                    role: profile.role || session.user.user_metadata?.role,
+                    organization_id:
+                        profile.organization_id ||
+                        session.user.user_metadata?.organization_id,
+                };
+
+                if (isMounted.current) {
+                    console.log(
+                        '[REFRESH_USER_SUCCESS] Setting combined user:',
+                        combinedUser,
+                    );
+                    setUser(combinedUser);
+                }
+                return combinedUser;
+            } else {
+                // Fallback structure if user row doesn't exist in DB yet (e.g., immediate signup race condition)
+                const userMetadata = session.user.user_metadata || {};
+                const fallbackUser = {
+                    id: session.user.id,
+                    email: session.user.email,
+                    full_name: userMetadata.full_name || '',
+                    role: userMetadata.role,
+                    organization_id: userMetadata.organization_id,
+                };
+                if (isMounted.current) {
+                    console.log(
+                        '[REFRESH_USER_FALLBACK] Using token metadata metadata:',
+                        fallbackUser,
+                    );
+                    setUser(fallbackUser);
+                }
+                return fallbackUser;
+            }
+        } catch (err) {
+            console.error('[REFRESH_USER_EXCEPTION]', err);
+            return null;
+        }
+    };
+
     useEffect(() => {
         isMounted.current = true;
 
-        async function fetchUserProfile(userId) {
-            try {
-                console.log(
-                    '[FETCH_PROFILE_START] Fetching profile for userId:',
-                    userId,
-                );
-                const result = await Promise.race([
-                    supabase
-                        .from('users')
-                        .select('id, role, organization_id, full_name, email')
-                        .eq('id', userId)
-                        .limit(1),
-                    timeoutPromise(5000),
-                ]);
-
-                const {data, error} = result;
-
-                if (error) {
-                    console.log(
-                        '[FETCH_PROFILE_ERROR] Error for userId:',
-                        userId,
-                        'error:',
-                        error,
-                    );
-                    return null;
-                }
-
-                if (!data || data.length === 0) {
-                    console.log(
-                        '[FETCH_PROFILE_NO_DATA] No data found for userId:',
-                        userId,
-                    );
-                    return null;
-                }
-
-                const profile = data[0];
-                console.log(
-                    '[FETCH_PROFILE_SUCCESS] Found profile for userId:',
-                    userId,
-                    'data:',
-                    profile,
-                );
-                return profile;
-            } catch (err) {
-                console.log(
-                    '[FETCH_PROFILE_EXCEPTION] Exception for userId:',
-                    userId,
-                    'error:',
-                    err,
-                );
-                return null;
-            }
-        }
-
-        async function getUserOrganization(userId) {
-            console.log(
-                '[GET_ORG_START] Getting organization for userId:',
-                userId,
-            );
-            try {
-                const {data: profile, error} = await Promise.race([
-                    supabase
-                        .from('users')
-                        .select('organization_id')
-                        .eq('id', userId)
-                        .limit(1),
-                    timeoutPromise(5000),
-                ]);
-
-                if (error) {
-                    console.log(
-                        '[GET_ORG_USER_PROFILE_ERROR] Error checking users table:',
-                        error,
-                    );
-                } else if (profile && profile.length > 0) {
-                    console.log(
-                        '[GET_ORG_USER_PROFILE_FOUND] Found organization for user:',
-                        profile[0].organization_id,
-                    );
-                    return profile[0].organization_id;
-                } else {
-                    console.log(
-                        '[GET_ORG_USER_PROFILE_NONE] No organization found in users table for userId:',
-                        userId,
-                    );
-                }
-            } catch (err) {
-                console.log(
-                    '[GET_ORG_USER_PROFILE_EXCEPTION] Exception checking users table:',
-                    err,
-                );
-            }
-
-            console.log(
-                '[GET_ORG_COMPLETE] Could not find organization ID for userId:',
-                userId,
-            );
-            return null;
-        }
-
-        async function initializeUser(userId) {
-            console.log(
-                '[INIT_USER_START] Initializing user for userId:',
-                userId,
-            );
-
-            let profile = null;
-            try {
-                profile = await fetchUserProfile(userId);
-            } catch (err) {
-                console.log(
-                    '[INIT_USER_FETCH_EXCEPTION] Exception in fetchUserProfile:',
-                    err,
-                );
-            }
-
-            if (profile) {
-                console.log(
-                    '[INIT_USER_PROFILE_FOUND] Using profile from database:',
-                    profile,
-                );
-                if (isMounted.current) {
-                    console.log(
-                        '[INIT_USER_SETTING_USER] Setting user from profile',
-                    );
-                    setUser(profile);
-                }
-                return profile;
-            }
-
-            console.log(
-                '[INIT_USER_NO_PROFILE] No profile found in database, trying to find organization...',
-            );
-            let organization_id = null;
-            try {
-                organization_id = await getUserOrganization(userId);
-            } catch (err) {
-                console.log(
-                    '[INIT_USER_GET_ORG_EXCEPTION] Exception in getUserOrganization:',
-                    err,
-                );
-            }
-
-            if (organization_id) {
-                const userData = {
-                    id: userId,
-                    email: '',
-                    full_name: '',
-                    role: undefined,
-                    organization_id: organization_id,
-                };
-                console.log(
-                    '[INIT_USER_ORG_FOUND] Created user object with found organization_id:',
-                    userData,
-                );
-                if (isMounted.current) {
-                    console.log(
-                        '[INIT_USER_SETTING_USER_ORG] Setting user from organization data',
-                    );
-                    setUser(userData);
-                }
-                return userData;
-            }
-
-            console.log(
-                '[INIT_USER_NO_ORG] Could not find organization ID from any source',
-            );
-            return null;
-        }
-
         async function initAuth() {
+            setLoading(true);
             try {
-                console.log('[INIT_AUTH_START] Getting session');
                 const {
                     data: {session},
-                } = await Promise.race([
-                    supabase.auth.getSession(),
-                    timeoutPromise(5000),
-                ]);
-                console.log(
-                    '[INIT_AUTH_SESSION] Session from getSession:',
-                    session,
-                );
-
-                if (isMounted.current && session?.user) {
-                    const userId = session.user.id;
-                    const userData = await initializeUser(userId);
-
-                    if (userData) {
-                        const finalUser = {
-                            ...userData,
-                            email: session.user.email || userData.email || '',
-                            full_name:
-                                session.user.user_metadata?.full_name ||
-                                userData.full_name ||
-                                '',
-                            role:
-                                session.user.user_metadata?.role ||
-                                userData.role ||
-                                undefined,
-                        };
-                        if (isMounted.current) {
-                            setUser(finalUser);
-                        }
-                    } else {
-                        const userMetadata = session.user.user_metadata || {};
-                        const fallbackUser = {
-                            id: session.user.id,
-                            email: session.user.email,
-                            full_name: userMetadata.full_name || '',
-                            role: userMetadata.role || undefined,
-                            organization_id:
-                                userMetadata.organization_id || undefined,
-                        };
-                        if (isMounted.current) {
-                            setUser(fallbackUser);
-                        }
-                    }
-                } else if (isMounted.current) {
-                    setUser(null);
+                } = await supabase.auth.getSession();
+                if (session) {
+                    await refreshUser(session);
                 }
             } catch (err) {
-                console.log(
-                    '[INIT_AUTH_EXCEPTION] Exception in initAuth:',
-                    err,
-                );
+                console.log('[INIT_AUTH_EXCEPTION]', err);
             } finally {
-                if (isMounted.current) {
-                    setLoading(false);
-                }
+                if (isMounted.current) setLoading(false);
             }
         }
 
-        console.log('[EFFECT_START] Running useEffect');
         initAuth();
 
         const {
             data: {subscription},
         } = supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log(
-                '[AUTH_STATE_CHANGE_START] Auth state change event:',
-                event,
-                'session:',
-                session,
-            );
-            if (session?.user && isMounted.current) {
-                const userId = session.user.id;
-                const userData = await initializeUser(userId);
-
-                if (userData) {
-                    const finalUser = {
-                        ...userData,
-                        email: session.user.email || userData.email || '',
-                        full_name:
-                            session.user.user_metadata?.full_name ||
-                            userData.full_name ||
-                            '',
-                        role:
-                            session.user.user_metadata?.role ||
-                            userData.role ||
-                            undefined,
-                    };
-                    if (isMounted.current) {
-                        setUser(finalUser);
-                    }
-                } else {
-                    const userMetadata = session.user.user_metadata || {};
-                    const fallbackUser = {
-                        id: session.user.id,
-                        email: session.user.email,
-                        full_name: userMetadata.full_name || '',
-                        role: userMetadata.role || undefined,
-                        organization_id:
-                            userMetadata.organization_id || undefined,
-                    };
-                    if (isMounted.current) {
-                        setUser(fallbackUser);
-                    }
-                }
-            } else if (isMounted.current) {
-                setUser(null);
+            console.log('[AUTH_STATE_CHANGE] Event:', event);
+            if (session) {
+                await refreshUser(session);
+            } else {
+                if (isMounted.current) setUser(null);
             }
+            if (isMounted.current) setLoading(false);
         });
 
         return () => {
             isMounted.current = false;
-            console.log('[EFFECT_CLEANUP] Cleaning up effect');
             subscription.unsubscribe();
         };
     }, []);
@@ -317,11 +138,18 @@ export function AuthProvider({children}) {
     async function signUp(email, password, fullName, churchName) {
         try {
             console.log('[SIGN_UP_START] Signup process for:', email);
+
+            // Step 1: Sign up user. Pass organization metadata ahead to mitigate auth state listeners race conditions
             const {data, error: authError} = await Promise.race([
                 supabase.auth.signUp({
                     email,
                     password,
-                    options: {data: {full_name: fullName}},
+                    options: {
+                        data: {
+                            full_name: fullName,
+                            role: 'admin',
+                        },
+                    },
                 }),
                 timeoutPromise(10000),
             ]);
@@ -329,6 +157,7 @@ export function AuthProvider({children}) {
             if (authError) throw authError;
 
             if (data.user) {
+                // Step 2: Trigger the Database RPC to handle organization infrastructure setup
                 const {data: orgData, error: orgError} = await Promise.race([
                     supabase.rpc('create_organization', {
                         p_name: churchName,
@@ -349,6 +178,7 @@ export function AuthProvider({children}) {
                 }
 
                 if (organization_id !== null) {
+                    // Step 3: Populate user profiles table
                     await Promise.race([
                         supabase.from('users').insert({
                             id: data.user.id,
@@ -359,6 +189,9 @@ export function AuthProvider({children}) {
                         }),
                         timeoutPromise(5000),
                     ]);
+
+                    // Force an immediate update of current state so organization_id populates instantly!
+                    await refreshUser();
                 }
             }
 
@@ -383,48 +216,9 @@ export function AuthProvider({children}) {
 
             if (error) throw error;
 
-            // FIXED HERE: Replaced 'mounted' with 'isMounted.current' which works flawlessly across context methods
-            if (isMounted.current) {
-                const userId = data.user.id;
-
-                // This triggers initializeUser safely
-                const userData = await Promise.race([
-                    supabase
-                        .from('users')
-                        .select('id, role, organization_id, full_name, email')
-                        .eq('id', userId)
-                        .limit(1),
-                    timeoutPromise(5000),
-                ]);
-
-                const profile = userData.data?.[0];
-
-                if (profile) {
-                    const finalUser = {
-                        ...profile,
-                        email: data.user.email || profile.email || '',
-                        full_name:
-                            data.user.user_metadata?.full_name ||
-                            profile.full_name ||
-                            '',
-                        role:
-                            data.user.user_metadata?.role ||
-                            profile.role ||
-                            undefined,
-                    };
-                    setUser(finalUser);
-                } else {
-                    const userMetadata = data.user.user_metadata || {};
-                    const fallbackUser = {
-                        id: data.user.id,
-                        email: data.user.email,
-                        full_name: userMetadata.full_name || '',
-                        role: userMetadata.role || undefined,
-                        organization_id:
-                            userMetadata.organization_id || undefined,
-                    };
-                    setUser(fallbackUser);
-                }
+            if (data.session) {
+                // Instantly re-pull full table records before resolving to make sure organization_id is available
+                await refreshUser(data.session);
             }
 
             return {data, error: null};
@@ -469,9 +263,12 @@ export function AuthProvider({children}) {
         signIn,
         signOut,
         resetPassword,
+        refreshUser, // Exposed in context in case pages want to force update
     };
 
     return (
-        <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+        <AuthContext.Provider value={value}>
+            {!loading && children}
+        </AuthContext.Provider>
     );
 }
