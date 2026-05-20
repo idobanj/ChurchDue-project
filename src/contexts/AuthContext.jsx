@@ -38,12 +38,13 @@ export function AuthProvider({children}) {
             console.log('[REFRESH_USER] Getting profile for:', userId);
 
             // Fetch the profile record directly from public.users
+            // NOTE: We select 'organisation_id' from your DB column and map it
             const result = await Promise.race([
                 supabase
                     .from('users')
-                    .select('id, role, organization_id, full_name, email')
+                    .select('id, role, organisation_id, full_name, email')
                     .eq('id', userId)
-                    .maybeSingle(), // Use maybeSingle to prevent array index confusion
+                    .maybeSingle(),
                 timeoutPromise(5000),
             ]);
 
@@ -58,9 +59,11 @@ export function AuthProvider({children}) {
                         session.user.user_metadata?.full_name ||
                         '',
                     role: profile.role || session.user.user_metadata?.role,
+                    // Map your database column (organisation_id) safely to frontend (organization_id)
                     organization_id:
-                        profile.organization_id ||
-                        session.user.user_metadata?.organization_id,
+                        profile.organisation_id ||
+                        session.user.user_metadata?.organization_id ||
+                        session.user.user_metadata?.organisation_id,
                 };
 
                 if (isMounted.current) {
@@ -79,11 +82,13 @@ export function AuthProvider({children}) {
                     email: session.user.email,
                     full_name: userMetadata.full_name || '',
                     role: userMetadata.role,
-                    organization_id: userMetadata.organization_id,
+                    organization_id:
+                        userMetadata.organization_id ||
+                        userMetadata.organisation_id,
                 };
                 if (isMounted.current) {
                     console.log(
-                        '[REFRESH_USER_FALLBACK] Using token metadata metadata:',
+                        '[REFRESH_USER_FALLBACK] Using token metadata:',
                         fallbackUser,
                     );
                     setUser(fallbackUser);
@@ -174,15 +179,18 @@ export function AuthProvider({children}) {
                     organization_id = orgData;
                 } else if (orgData && typeof orgData === 'object') {
                     organization_id =
-                        orgData.id || orgData.organization_id || orgData.org_id;
+                        orgData.id ||
+                        orgData.organization_id ||
+                        orgData.org_id ||
+                        orgData.organisation_id;
                 }
 
                 if (organization_id !== null) {
-                    // Step 3: Populate user profiles table
+                    // Step 3: Populate user profiles table using your schema column 'organisation_id'
                     await Promise.race([
                         supabase.from('users').insert({
                             id: data.user.id,
-                            organization_id: organization_id,
+                            organisation_id: organization_id,
                             full_name: fullName,
                             email: data.user.email,
                             role: 'admin',
