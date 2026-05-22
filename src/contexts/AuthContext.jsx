@@ -5,7 +5,6 @@ import {supabase} from '../services/supabaseClient';
 
 const AuthContext = createContext({});
 
-// Helper function to create a promise that rejects after a timeout
 const timeoutPromise = (ms) =>
     new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Operation timed out')), ms),
@@ -15,12 +14,9 @@ export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({children}) {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true); // Default to true while checking initial session
-
-    // Use a ref so ALL functions inside this component can check if it's safe to update state
+    const [loading, setLoading] = useState(true);
     const isMounted = useRef(true);
 
-    // Reusable core function to pull profile records and combine them with Auth session info
     const refreshUser = async (currentSession = null) => {
         try {
             let session = currentSession;
@@ -37,8 +33,6 @@ export function AuthProvider({children}) {
             const userId = session.user.id;
             console.log('[REFRESH_USER] Getting profile for:', userId);
 
-            // Fetch the profile record directly from public.users
-            // NOTE: We select 'organization_id' from your DB column and map it
             const result = await Promise.race([
                 supabase
                     .from('users')
@@ -50,63 +44,35 @@ export function AuthProvider({children}) {
 
             const profile = result?.data;
 
-            console.log(
-                '[REFRESH_USER_DEBUG] Database result error:',
-                result.error,
-            );
+            console.log('[REFRESH_USER_DEBUG] Database result error:', result.error);
             console.log('[REFRESH_USER_DEBUG] Row data returned:', result.data);
 
             if (profile) {
                 const combinedUser = {
                     id: session.user.id,
                     email: session.user.email || profile.email || '',
-                    full_name:
-                        profile.full_name ||
-                        session.user.user_metadata?.full_name ||
-                        '',
+                    full_name: profile.full_name || session.user.user_metadata?.full_name || '',
                     role: profile.role || session.user.user_metadata?.role || null,
-                    // Map your database column (organization_id) safely to frontend (organization_id)
-                    organization_id:
-                        profile.organization_id ||
-                        session.user.user_metadata?.organization_id ||
-                        session.user.user_metadata?.organization_id || null,
+                    organization_id: profile.organization_id || null,
                 };
 
                 if (isMounted.current) {
-                    console.log(
-                        '[REFRESH_USER_SUCCESS] Setting combined user:',
-                        combinedUser,
-                    );
+                    console.log('[REFRESH_USER_SUCCESS] Setting combined user:', combinedUser);
                     setUser(combinedUser);
                 }
                 return combinedUser;
             } else {
-                // Fallback structure if user row doesn't exist in DB yet (e.g., immediate signup race condition)
                 const userMetadata = session.user.user_metadata || {};
                 const fallbackUser = {
                     id: session.user.id,
                     email: session.user.email,
                     full_name: userMetadata.full_name || '',
                     role: userMetadata.role || null,
-                    organization_id:
-                        (userMetadata.organization_id || userMetadata.organization_id) || null,
+                    organization_id: userMetadata.organization_id || null, 
                 };
 
-                // Log when critical fields are missing from fallback
                 if (isMounted.current) {
-                    console.log(
-                        '[REFRESH_USER_FALLBACK] Using token metadata:',
-                        fallbackUser,
-                    );
-
-                    // Warn if critical fields are missing
-                    if (!fallbackUser.role) {
-                        console.warn('[REFRESH_USER_WARNING] Role is missing from user metadata');
-                    }
-                    if (!fallbackUser.organization_id) {
-                        console.warn('[REFRESH_USER_WARNING] Organization ID is missing from user metadata');
-                    }
-
+                    console.log('[REFRESH_USER_FALLBACK] Using token metadata:', fallbackUser);
                     setUser(fallbackUser);
                 }
                 return fallbackUser;
@@ -123,9 +89,7 @@ export function AuthProvider({children}) {
         async function initAuth() {
             setLoading(true);
             try {
-                const {
-                    data: {session},
-                } = await supabase.auth.getSession();
+                const {data: {session}} = await supabase.auth.getSession();
                 if (session) {
                     await refreshUser(session);
                 }
@@ -138,9 +102,7 @@ export function AuthProvider({children}) {
 
         initAuth();
 
-        const {
-            data: {subscription},
-        } = supabase.auth.onAuthStateChange(async (event, session) => {
+        const {data: {subscription}} = supabase.auth.onAuthStateChange(async (event, session) => {
             console.log('[AUTH_STATE_CHANGE] Event:', event);
             if (session) {
                 await refreshUser(session);
@@ -160,7 +122,6 @@ export function AuthProvider({children}) {
         try {
             console.log('[SIGN_UP_START] Signup process for:', email);
 
-            // Step 1: Sign up user. Pass organization metadata ahead to mitigate auth state listeners race conditions
             const {data, error: authError} = await Promise.race([
                 supabase.auth.signUp({
                     email,
@@ -178,7 +139,6 @@ export function AuthProvider({children}) {
             if (authError) throw authError;
 
             if (data.user) {
-                // Step 2: Trigger the Database RPC to handle organization infrastructure setup
                 const {data: orgData, error: orgError} = await Promise.race([
                     supabase.rpc('create_organization', {
                         p_name: churchName,
@@ -194,15 +154,11 @@ export function AuthProvider({children}) {
                 if (typeof orgData === 'number') {
                     organization_id = orgData;
                 } else if (orgData && typeof orgData === 'object') {
-                    organization_id =
-                        orgData.id ||
-                        orgData.organization_id ||
-                        orgData.org_id ||
-                        orgData.organization_id;
+                    organization_id = orgData.id || orgData.organization_id || orgData.org_id;
                 }
 
                 if (organization_id !== null) {
-                    // Step 3: Populate user profiles table using your schema column 'organization_id'
+                    // Step 3: Insert profile data record
                     await Promise.race([
                         supabase.from('users').insert({
                             id: data.user.id,
@@ -214,7 +170,12 @@ export function AuthProvider({children}) {
                         timeoutPromise(5000),
                     ]);
 
-                    // Force an immediate update of current state so organization_id populates instantly!
+                    // ✨ Step 4: Sync structural details straight back into Auth metadata properties 
+                    // This securely prevents metadata loop traps if the system relies on fallbacks
+                    await supabase.auth.updateUser({
+                        data: { organization_id: organization_id }
+                    });
+
                     await refreshUser();
                 }
             }
@@ -224,8 +185,7 @@ export function AuthProvider({children}) {
             console.log('[SIGN_UP_EXCEPTION] Signup process error:', error);
             return {
                 data: null,
-                error:
-                    error instanceof Error ? error : {message: String(error)},
+                error: error instanceof Error ? error : {message: String(error)},
             };
         }
     }
@@ -241,7 +201,6 @@ export function AuthProvider({children}) {
             if (error) throw error;
 
             if (data.session) {
-                // Instantly re-pull full table records before resolving to make sure organization_id is available
                 await refreshUser(data.session);
             }
 
@@ -250,8 +209,7 @@ export function AuthProvider({children}) {
             console.log('[SIGN_IN_EXCEPTION] Sign in process error:', error);
             return {
                 data: null,
-                error:
-                    error instanceof Error ? error : {message: String(error)},
+                error: error instanceof Error ? error : {message: String(error)},
             };
         }
     }
@@ -287,7 +245,7 @@ export function AuthProvider({children}) {
         signIn,
         signOut,
         resetPassword,
-        refreshUser, // Exposed in context in case pages want to force update
+        refreshUser,
     };
 
     return (
