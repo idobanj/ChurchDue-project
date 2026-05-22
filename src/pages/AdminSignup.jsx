@@ -1,12 +1,13 @@
 /** @format */
 
-import {useState} from 'react';
-import {Link, useNavigate} from 'react-router-dom';
-import {useAuth} from '../contexts/AuthContext';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../services/supabaseClient';
 
 export default function AdminSignup() {
     const navigate = useNavigate();
-    const {signUp} = useAuth();
+    const { signUp } = useAuth();
     const [formData, setFormData] = useState({
         churchName: '',
         fullName: '',
@@ -18,7 +19,7 @@ export default function AdminSignup() {
     const [loading, setLoading] = useState(false);
 
     function handleChange(e) {
-        setFormData({...formData, [e.target.name]: e.target.value});
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     }
 
     async function handleSubmit(e) {
@@ -38,81 +39,100 @@ export default function AdminSignup() {
             return;
         }
 
-        console.log('AdminSignup: Calling signUp function from useAuth...');
         setLoading(true);
+        let createdOrgId = null;
+
         try {
-            const {data, error} = await signUp(
+            // 1. Generate a URL-friendly unique slug from the Church/Organization Name
+            const slug = formData.churchName
+                .toLowerCase()
+                .trim()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)+/g, '');
+
+            console.log('AdminSignup: Registering organization with slug:', slug);
+
+            // 2. Insert the Organization into your public custom tables
+            const { data: orgData, error: orgError } = await supabase
+                .from('organizations')
+                .insert([
+                    {
+                        name: formData.churchName,
+                        slug: slug,
+                        paystack_connected: false
+                    }
+                ])
+                .select()
+                .single();
+
+            if (orgError) throw orgError;
+            
+            createdOrgId = orgData.id;
+            console.log('AdminSignup: Organization successfully provisioned with ID:', createdOrgId);
+
+            // 3. Register the Admin user and pass metadata directly down into your PostgreSQL database trigger
+            const { data: authData, error: authError } = await signUp(
                 formData.email,
                 formData.password,
-                formData.fullName,
-                formData.churchName,
+                {
+                    fullName: formData.fullName,
+                    role: 'admin',
+                    organization_id: createdOrgId
+                }
             );
 
-            console.log('AdminSignup: signUp returned', {data, error});
-
-            if (error) {
-                setError(
-                    error.message ||
-                        'An unexpected error occurred during signup',
-                );
-                setLoading(false);
-                return;
+            if (authError) {
+                console.error('AdminSignup: Auth registration failed. Commencing clean rollback of organization:', createdOrgId);
+                // Rollback database side allocation to maintain database integrity
+                await supabase.from('organizations').delete().eq('id', createdOrgId);
+                throw authError;
             }
 
-            if (data?.user) {
-                console.log(
-                    'AdminSignup: User created, navigating to dashboard...',
-                );
-                navigate('/admin/dashboard', {
-                    state: {
-                        message:
-                            'Account created successfully! Please check your email to verify your account.',
-                    },
-                });
-            } else {
-                setError('Account creation failed: No user data returned');
-                setLoading(false);
+            // 4. On successful pipeline completion, route to the dashboard
+            if (authData?.user) {
+                console.log('AdminSignup: Registration pipeline complete. Redirecting...');
+                navigate('/admin/dashboard');
             }
+
         } catch (err) {
-            console.error('AdminSignup: Catch block triggered:', err);
-            setError(err.message || 'An unexpected error occurred');
+            console.error('Signup pipeline failure process log:', err);
+            setError(err.message || 'An error occurred during account setup.');
+        } finally {
             setLoading(false);
         }
     }
 
     return (
-        <div className='min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
+        <div className='min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
             <div className='sm:mx-auto sm:w-full sm:max-w-md'>
                 <div className='flex justify-center'>
                     <svg
-                        className='w-12 h-12 text-primary-600'
+                        className='w-12 h-12 text-blue-600'
                         fill='currentColor'
                         viewBox='0 0 24 24'>
                         <path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5' />
                     </svg>
                 </div>
-                <h2 className='mt-6 text-center text-3xl font-bold text-gray-900'>
-                    Create Church Account
+                <h2 className='mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white'>
+                    Create your church account
                 </h2>
-                <p className='mt-2 text-center text-sm text-gray-600'>
-                    Register your church to start managing dues
+                <p className='mt-2 text-center text-sm text-gray-600 dark:text-gray-400'>
+                    Start managing your student dues securely
                 </p>
             </div>
 
             <div className='mt-8 sm:mx-auto sm:w-full sm:max-w-md'>
-                <div className='bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10'>
+                <div className='bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200 dark:border-gray-700'>
                     {error && (
-                        <div className='mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg'>
+                        <div className='mb-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium border border-red-200 dark:border-red-800'>
                             {error}
                         </div>
                     )}
 
-                    <form className='space-y-4' onSubmit={handleSubmit}>
+                    <form className='space-y-6' onSubmit={handleSubmit}>
                         <div>
-                            <label
-                                htmlFor='churchName'
-                                className='block text-sm font-medium text-gray-700'>
-                                Church Name
+                            <label htmlFor='churchName' className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
+                                Church / Fellowship Name
                             </label>
                             <input
                                 id='churchName'
@@ -121,15 +141,13 @@ export default function AdminSignup() {
                                 required
                                 value={formData.churchName}
                                 onChange={handleChange}
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500'
-                                placeholder='e.g., Grace Fellowship'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500'
+                                placeholder='e.g. RCF FUT Minna'
                             />
                         </div>
 
                         <div>
-                            <label
-                                htmlFor='fullName'
-                                className='block text-sm font-medium text-gray-700'>
+                            <label htmlFor='fullName' className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
                                 Admin Full Name
                             </label>
                             <input
@@ -139,34 +157,29 @@ export default function AdminSignup() {
                                 required
                                 value={formData.fullName}
                                 onChange={handleChange}
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500'
-                                placeholder='e.g., John Doe'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500'
+                                placeholder='John Doe'
                             />
                         </div>
 
                         <div>
-                            <label
-                                htmlFor='email'
-                                className='block text-sm font-medium text-gray-700'>
-                                Email address
+                            <label htmlFor='email' className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
+                                Email Address
                             </label>
                             <input
                                 id='email'
                                 name='email'
                                 type='email'
-                                autoComplete='email'
                                 required
                                 value={formData.email}
                                 onChange={handleChange}
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500'
-                                placeholder='admin@church.com'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500'
+                                placeholder='admin@church.org'
                             />
                         </div>
 
                         <div>
-                            <label
-                                htmlFor='password'
-                                className='block text-sm font-medium text-gray-700'>
+                            <label htmlFor='password' className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
                                 Password
                             </label>
                             <input
@@ -176,15 +189,13 @@ export default function AdminSignup() {
                                 required
                                 value={formData.password}
                                 onChange={handleChange}
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500'
-                                placeholder='Create a password'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500'
+                                placeholder='••••••••'
                             />
                         </div>
 
                         <div>
-                            <label
-                                htmlFor='confirmPassword'
-                                className='block text-sm font-medium text-gray-700'>
+                            <label htmlFor='confirmPassword' className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
                                 Confirm Password
                             </label>
                             <input
@@ -194,15 +205,15 @@ export default function AdminSignup() {
                                 required
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500'
-                                placeholder='Confirm your password'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500'
+                                placeholder='••••••••'
                             />
                         </div>
 
                         <button
                             type='submit'
                             disabled={loading}
-                            className='w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed'>
+                            className='w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed'>
                             {loading ? 'Creating account...' : 'Create account'}
                         </button>
                     </form>
@@ -210,10 +221,10 @@ export default function AdminSignup() {
                     <div className='mt-6'>
                         <div className='relative'>
                             <div className='absolute inset-0 flex items-center'>
-                                <div className='w-full border-t border-gray-300' />
+                                <div className='w-full border-t border-gray-300 dark:border-gray-600' />
                             </div>
                             <div className='relative flex justify-center text-sm'>
-                                <span className='px-2 bg-white text-gray-500'>
+                                <span className='px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400'>
                                     Already have an account?
                                 </span>
                             </div>
@@ -222,7 +233,7 @@ export default function AdminSignup() {
                         <div className='mt-6'>
                             <Link
                                 to='/admin/login'
-                                className='w-full flex justify-center py-2 px-4 border border-primary-600 rounded-lg shadow-sm text-sm font-medium text-primary-600 bg-white hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'>
+                                className='w-full flex justify-center py-2 px-4 border border-blue-600 dark:border-blue-500 rounded-lg shadow-sm text-sm font-medium text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
                                 Sign in instead
                             </Link>
                         </div>
