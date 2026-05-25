@@ -49,9 +49,9 @@ export default function StudentDueDetails() {
 
   if (isLoading) {
     return (
-      <div className="flex">
+      <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-900">
         <StudentSidebar />
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center p-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
         </div>
       </div>
@@ -60,9 +60,9 @@ export default function StudentDueDetails() {
 
   if (!due) {
     return (
-      <div className="flex">
+      <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-900">
         <StudentSidebar />
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-4 md:p-8">
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold text-gray-900">Due not found</h2>
             <button
@@ -82,9 +82,9 @@ export default function StudentDueDetails() {
   const isFullyPaid = remaining <= 0
 
   return (
-    <div className="flex">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-900">
       <StudentSidebar />
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-4 md:p-8">
         <button
           onClick={() => navigate('/student/dues')}
           className="flex items-center text-gray-600 hover:text-gray-900 mb-6"
@@ -101,7 +101,7 @@ export default function StudentDueDetails() {
             <h1 className="text-2xl font-bold text-gray-900 mb-2">{due.title}</h1>
             <p className="text-gray-600 mb-6">{due.description}</p>
 
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
               <div className="bg-gray-50 rounded-lg p-4">
                 <p className="text-sm text-gray-500">Total Amount</p>
                 <p className="text-2xl font-bold text-gray-900">₦{due.amount.toLocaleString()}</p>

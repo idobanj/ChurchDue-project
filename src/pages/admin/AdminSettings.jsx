@@ -39,9 +39,9 @@ export default function AdminSettings() {
   }
 
   return (
-    <div className="flex">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-900">
       <AdminSidebar />
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-4 md:p-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
           <p className="text-gray-600 mt-1">Manage your organization settings</p>
@@ -83,12 +83,12 @@ export default function AdminSettings() {
             <p className="text-sm text-gray-600 mb-4">
               Share this link with students to allow them to join your organization
             </p>
-            <div className="flex space-x-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="text"
                 value={inviteLink}
                 readOnly
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 text-sm"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 text-sm min-w-0"
               />
               <button
                 onClick={handleCopyInvite}
@@ -106,7 +106,7 @@ export default function AdminSettings() {
           {/* Paystack Integration */}
           <div className="bg-white rounded-xl shadow-sm p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Payment Integration</h2>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h3 className="font-medium text-gray-900">Paystack</h3>
                 <p className="text-sm text-gray-500">
@@ -115,7 +115,7 @@ export default function AdminSettings() {
                     : 'Connect your Paystack account to receive payments'}
                 </p>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 flex-wrap gap-y-2">
                 <span
                   className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
                     paystackConnected
@@ -126,7 +126,7 @@ export default function AdminSettings() {
                   {paystackConnected ? 'Connected' : 'Not Connected'}
                 </span>
                 <button
-                  className="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700"
+                  className="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 whitespace-nowrap"
                 >
                   {paystackConnected ? 'Configure' : 'Connect Paystack'}
                 </button>

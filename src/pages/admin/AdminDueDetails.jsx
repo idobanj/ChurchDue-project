@@ -108,9 +108,9 @@ export default function AdminDueDetails() {
   const isLoading = dueLoading || studentsLoading || paymentsLoading
 
   return (
-    <div className="flex">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-900">
       <AdminSidebar />
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-4 md:p-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <Link to="/admin/dues" className="text-sm text-primary-600 hover:text-primary-500">
@@ -167,65 +167,67 @@ export default function AdminDueDetails() {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Student
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount Paid
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount Remaining
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {isLoading ? (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                    Loading due details...
-                  </td>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Student
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount Paid
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount Remaining
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
                 </tr>
-              ) : filteredRows.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                    No students match your filters
-                  </td>
-                </tr>
-              ) : (
-                filteredRows.map((row) => (
-                  <tr key={row.studentEmail} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <p className="font-medium text-gray-900">{row.studentName}</p>
-                      <p className="text-sm text-gray-500">{row.studentEmail}</p>
-                    </td>
-                    <td className="px-6 py-4 font-semibold text-green-600">₦{row.amountPaid.toLocaleString()}</td>
-                    <td className="px-6 py-4 font-semibold text-orange-600">
-                      ₦{row.amountRemaining.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                          row.paymentStatus === 'completed'
-                            ? 'bg-green-100 text-green-700'
-                            : row.paymentStatus === 'partial'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-gray-100 text-gray-700'
-                        }`}
-                      >
-                        {row.paymentStatus}
-                      </span>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                      Loading due details...
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : filteredRows.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                      No students match your filters
+                    </td>
+                  </tr>
+                ) : (
+                  filteredRows.map((row) => (
+                    <tr key={row.studentEmail} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <p className="font-medium text-gray-900">{row.studentName}</p>
+                        <p className="text-sm text-gray-500">{row.studentEmail}</p>
+                      </td>
+                      <td className="px-6 py-4 font-semibold text-green-600">₦{row.amountPaid.toLocaleString()}</td>
+                      <td className="px-6 py-4 font-semibold text-orange-600">
+                        ₦{row.amountRemaining.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
+                            row.paymentStatus === 'completed'
+                              ? 'bg-green-100 text-green-700'
+                              : row.paymentStatus === 'partial'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-gray-100 text-gray-700'
+                          }`}
+                        >
+                          {row.paymentStatus}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

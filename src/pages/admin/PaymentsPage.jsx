@@ -61,17 +61,17 @@ export default function PaymentsPage() {
   }
 
   return (
-    <div className="flex">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-900">
       <AdminSidebar />
-      <div className="flex-1 p-8">
-        <div className="flex items-center justify-between mb-8">
+      <div className="flex-1 p-4 md:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Payments</h1>
             <p className="text-gray-600 mt-1">Track all incoming payments</p>
           </div>
           <button
             onClick={exportToCSV}
-            className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 flex items-center space-x-2"
+            className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 flex items-center justify-center space-x-2 w-full sm:w-auto"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -114,85 +114,87 @@ export default function PaymentsPage() {
 
         {/* Payments Table */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Student
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Due
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Payment Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Reference
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {isLoading ? (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                    Loading payments...
-                  </td>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Student
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Due
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Payment Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Reference
+                  </th>
                 </tr>
-              ) : filteredPayments?.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                    {searchTerm || statusFilter !== 'all' ? 'No matching payments found' : 'No payments yet'}
-                  </td>
-                </tr>
-              ) : (
-                filteredPayments?.map((payment) => (
-                  <tr key={payment.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div>
-                        <p className="font-medium text-gray-900">{payment.users?.full_name}</p>
-                        <p className="text-sm text-gray-500">{payment.users?.email}</p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-gray-900">{payment.dues?.title}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="font-semibold text-green-600">
-                        ₦{payment.amount_paid?.toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                          payment.status === 'completed'
-                            ? 'bg-green-100 text-green-700'
-                            : payment.status === 'pending'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-red-100 text-red-700'
-                        }`}
-                      >
-                        {payment.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {new Date(payment.paid_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <code className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                        {payment.paystack_reference?.substring(0, 12)}...
-                      </code>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                      Loading payments...
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : filteredPayments?.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                      {searchTerm || statusFilter !== 'all' ? 'No matching payments found' : 'No payments yet'}
+                    </td>
+                  </tr>
+                ) : (
+                  filteredPayments?.map((payment) => (
+                    <tr key={payment.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <div>
+                          <p className="font-medium text-gray-900">{payment.users?.full_name}</p>
+                          <p className="text-sm text-gray-500">{payment.users?.email}</p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-gray-900">{payment.dues?.title}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="font-semibold text-green-600">
+                          ₦{payment.amount_paid?.toLocaleString()}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
+                            payment.status === 'completed'
+                              ? 'bg-green-100 text-green-700'
+                              : payment.status === 'pending'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}
+                        >
+                          {payment.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        {new Date(payment.paid_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <code className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                          {payment.paystack_reference?.substring(0, 12)}...
+                        </code>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
