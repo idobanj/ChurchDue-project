@@ -36,7 +36,7 @@ export default function StudentsPage() {
       <AdminSidebar />
       <div className="flex-1 p-4 md:p-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Students</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-200">Students</h1>
           <p className="text-gray-600 mt-1">View and manage all students in your organization</p>
         </div>
 

@@ -88,11 +88,11 @@ export default function AdminDashboard() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white dark:bg-gray-800 dark:border-gray-700 border-gray-200 rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Dues</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalDues}</p>
+                <p className="text-sm dark:text-gray-400 text-gray-600">Total Dues</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalDues}</p>
               </div>
               <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
                 <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,11 +102,11 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white  dark:bg-gray-800 dark:border-gray-700 border-gray-200 rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Collected</p>
-                <p className="text-3xl font-bold text-gray-900">₦{stats.totalCollected.toLocaleString()}</p>
+                <p className="text-sm dark:text-gray-400 text-gray-600">Total Collected</p>
+                <p className="text-3xl font-bold dark:text-white text-gray-900">₦{stats.totalCollected.toLocaleString()}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,11 +116,11 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white  dark:bg-gray-800 dark:border-gray-700 border-gray-200 rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Outstanding</p>
-                <p className="text-3xl font-bold text-gray-900">₦{stats.totalOutstanding.toLocaleString()}</p>
+                <p className="text-sm dark:text-gray-400 text-gray-600">Outstanding</p>
+                <p className="text-3xl font-bold dark:text-white text-gray-900">₦{stats.totalOutstanding.toLocaleString()}</p>
               </div>
               <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
                 <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -130,11 +130,11 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white  dark:bg-gray-800 dark:border-gray-700 border-gray-200 rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Students</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalStudents}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 ">Total Students</p>
+                <p className="text-3xl font-bold dark:text-white text-gray-900">{stats.totalStudents}</p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,8 +147,8 @@ export default function AdminDashboard() {
 
         {/* Chart and Recent Payments */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Payment Overview</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <h2 className="text-lg font-semibold dark:text-white text-gray-900 mb-4">Payment Overview</h2>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -160,9 +160,9 @@ export default function AdminDashboard() {
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white  dark:bg-gray-800 dark:border-gray-700 border-gray-200 rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Recent Payments</h2>
+              <h2 className="text-lg font-semibold dark:text-white text-gray-900">Recent Payments</h2>
               <Link to="/admin/payments" className="text-sm text-primary-600 hover:text-primary-500">
                 View all
               </Link>

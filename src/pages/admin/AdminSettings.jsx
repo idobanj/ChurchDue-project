@@ -49,38 +49,39 @@ export default function AdminSettings() {
 
         <div className="space-y-6">
           {/* Organization Info */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Organization Information</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-300 mb-4">Organization Information</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 dark:mb-1">
                   Church Name
                 </label>
                 <input
                   type="text"
+                  
                   value={organization?.name || ''}
                   readOnly
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 dark:mb-1">
                   Organization Slug
                 </label>
                 <input
                   type="text"
                   value={organization?.slug || ''}
                   readOnly
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 focus:outline-none"
                 />
               </div>
             </div>
           </div>
 
           {/* Invite Link */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Invite Link</h2>
-            <p className="text-sm text-gray-600 mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-300 mb-4">Invite Link</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               Share this link with students to allow them to join your organization
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
@@ -104,12 +105,12 @@ export default function AdminSettings() {
           </div>
 
           {/* Paystack Integration */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Payment Integration</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-300 mb-4">Payment Integration</h2>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h3 className="font-medium text-gray-900">Paystack</h3>
-                <p className="text-sm text-gray-500">
+                <h3 className="font-medium text-gray-900 dark:text-gray-300">Paystack</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {paystackConnected
                     ? 'Your Paystack account is connected'
                     : 'Connect your Paystack account to receive payments'}
@@ -135,12 +136,12 @@ export default function AdminSettings() {
           </div>
 
           {/* Danger Zone */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border-2 border-red-200">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border-2 border-red-500">
             <h2 className="text-xl font-semibold text-red-600 mb-4">Danger Zone</h2>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               Irreversible and destructive actions
             </p>
-            <button className="px-4 py-2 border border-red-300 text-red-600 rounded-lg font-medium hover:bg-red-50 transition-colors">
+            <button className="px-4 py-2 border border-red-500 text-red-600 rounded-lg font-medium hover:bg-red-50 transition-colors">
               Delete Organization
             </button>
           </div>
