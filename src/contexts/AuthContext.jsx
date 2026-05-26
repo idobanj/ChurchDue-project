@@ -70,6 +70,15 @@ export function AuthProvider({ children }) {
     useEffect(() => {
         isMounted.current = true;
 
+        // Handle bfcache (back/forward button) session validation
+        const handlePageShow = (event) => {
+            if (event.persisted) {
+                console.log('[AUTH_CACHE] Page restored from bfcache, refreshing user session...');
+                refreshUser();
+            }
+        };
+        window.addEventListener('pageshow', handlePageShow);
+
         // Run profile synchronization initialization check on mount
         refreshUser().finally(() => {
             if (isMounted.current) setLoading(false);
@@ -89,6 +98,7 @@ export function AuthProvider({ children }) {
         return () => {
             isMounted.current = false;
             subscription?.unsubscribe();
+            window.removeEventListener('pageshow', handlePageShow);
         };
     }, []);
 
