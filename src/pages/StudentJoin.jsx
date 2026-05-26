@@ -43,26 +43,29 @@ export default function StudentJoin() {
         password: formData.password,
         options: {
           data: {
-            full_name: formData.fullName,
+            fullName: formData.fullName,
             organization_id: org.id,
             role: 'student'
           },
         },
       })
 
+
       if (authError) throw authError
 
       if (authData.user) {
         // 3. Create user profile in the public.users table
+        // Use upsert to avoid primary key conflicts if a database trigger already created the record
         const { error: profileError } = await supabase
           .from('users')
-          .insert({
+          .upsert({
             id: authData.user.id,
             organization_id: org.id,
             role: 'student',
             full_name: formData.fullName,
             email: formData.email
           })
+
 
         if (profileError) throw profileError
 
