@@ -74,7 +74,10 @@ export function AuthProvider({ children }) {
         const handlePageShow = (event) => {
             if (event.persisted) {
                 console.log('[AUTH_CACHE] Page restored from bfcache, refreshing user session...');
-                refreshUser();
+                setLoading(true);
+                refreshUser().finally(() => {
+                    if (isMounted.current) setLoading(false);
+                });
             }
         };
         window.addEventListener('pageshow', handlePageShow);

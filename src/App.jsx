@@ -2,6 +2,7 @@
 
 import {Routes, Route} from 'react-router-dom';
 import {AuthProvider} from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Landing from './pages/Landing';
 import AdminLogin from './pages/AdminLogin';
 import AdminSignup from './pages/AdminSignup';
@@ -44,22 +45,22 @@ function AppRoutes() {
             <Route path='/admin/signup' element={<AdminSignup />} />
 
             {/* Admin Routes */}
-            <Route path='/admin/dashboard' element={<AdminDashboard />} />
-            <Route path='/admin/dues' element={<DuesManagement />} />
-            <Route path='/admin/payments' element={<PaymentsPage />} />
-            <Route path='/admin/students' element={<StudentsPage />} />
-            <Route path='/admin/refunds' element={<RefundRequests />} />
-            <Route path='/admin/settings' element={<AdminSettings />} />
-            <Route path='/admin/due/:id' element={<AdminDueDetails />} />
+            <Route path='/admin/dashboard' element={<ProtectedRoute expectedRole="admin"><AdminDashboard /></ProtectedRoute>} />
+            <Route path='/admin/dues' element={<ProtectedRoute expectedRole="admin"><DuesManagement /></ProtectedRoute>} />
+            <Route path='/admin/payments' element={<ProtectedRoute expectedRole="admin"><PaymentsPage /></ProtectedRoute>} />
+            <Route path='/admin/students' element={<ProtectedRoute expectedRole="admin"><StudentsPage /></ProtectedRoute>} />
+            <Route path='/admin/refunds' element={<ProtectedRoute expectedRole="admin"><RefundRequests /></ProtectedRoute>} />
+            <Route path='/admin/settings' element={<ProtectedRoute expectedRole="admin"><AdminSettings /></ProtectedRoute>} />
+            <Route path='/admin/due/:id' element={<ProtectedRoute expectedRole="admin"><AdminDueDetails /></ProtectedRoute>} />
 
             <Route path='/student/login' element={<StudentLogin />} />
             <Route path='/student/signup' element={<StudentSignup />} />
             <Route path='/join/:slug' element={<StudentJoin />} />
 
             {/* Student Routes */}
-            <Route path='/student/dashboard' element={<StudentDashboard />} />
-            <Route path='/student/dues' element={<StudentDues />} />
-            <Route path='/student/due/:id' element={<StudentDueDetails />} />
+            <Route path='/student/dashboard' element={<ProtectedRoute expectedRole="student"><StudentDashboard /></ProtectedRoute>} />
+            <Route path='/student/dues' element={<ProtectedRoute expectedRole="student"><StudentDues /></ProtectedRoute>} />
+            <Route path='/student/due/:id' element={<ProtectedRoute expectedRole="student"><StudentDueDetails /></ProtectedRoute>} />
 
             <Route path='/forgot-password' element={<ForgotPassword />} />
             <Route path='/reset-password' element={<ResetPassword />} />
