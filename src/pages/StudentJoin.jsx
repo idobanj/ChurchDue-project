@@ -13,6 +13,7 @@ export default function StudentJoin() {
     email: '',
     password: '',
     confirmPassword: '',
+    dateOfBirth: '',
   })
 
   async function handleSubmit(e) {
@@ -45,7 +46,8 @@ export default function StudentJoin() {
           data: {
             fullName: formData.fullName,
             organization_id: org.id,
-            role: 'student'
+            role: 'student',
+            dateOfBirth: formData.dateOfBirth
           },
         },
       })
@@ -63,7 +65,8 @@ export default function StudentJoin() {
             organization_id: org.id,
             role: 'student',
             full_name: formData.fullName,
-            email: formData.email
+            email: formData.email,
+            date_of_birth: formData.dateOfBirth
           })
 
 
@@ -123,6 +126,16 @@ export default function StudentJoin() {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500"
                 placeholder="student@email.com"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+              <input
+                type="date"
+                required
+                value={formData.dateOfBirth}
+                onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
             <div>
