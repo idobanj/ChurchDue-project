@@ -53,8 +53,13 @@ export function AuthProvider({ children }) {
                         ...profile,
                     });
                 } else {
-                    // Fallback to basic auth object if background trigger profile synchronization is still running
-                    setUser(session.user);
+                    // Fallback to basic auth object and extract role from metadata if profile synchronization is still running
+                    const metadataRole = session.user.user_metadata?.role || session.user.app_metadata?.role;
+
+                    setUser({
+                        ...session.user,
+                        role: metadataRole || 'student', // Default to student if no role found, or handle explicitly
+                    });
                 }
             }
             return session.user;
