@@ -53,12 +53,14 @@ export function AuthProvider({ children }) {
                         ...profile,
                     });
                 } else {
-                    // Fallback to basic auth object and extract role from metadata if profile synchronization is still running
+                    // Fallback to basic auth object and extract role and organization_id from metadata if profile synchronization is still running
                     const metadataRole = session.user.user_metadata?.role || session.user.app_metadata?.role;
+                    const metadataOrganizationId = session.user.user_metadata?.organization_id || session.user.app_metadata?.organization_id || null;
 
                     setUser({
                         ...session.user,
                         role: metadataRole || 'student', // Default to student if no role found, or handle explicitly
+                        organization_id: metadataOrganizationId,
                     });
                 }
             }

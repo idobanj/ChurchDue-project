@@ -1,16 +1,15 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../services/supabaseClient'
 import StudentSidebar from '../../components/StudentSidebar'
 import PaymentModal from '../../components/PaymentModal'
 import { useAuth } from '../../contexts/AuthContext'
 
 export default function StudentDues() {
-  const navigate = useNavigate()
   const { user } = useAuth()
   const [selectedDue, setSelectedDue] = useState(null)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [showDetailsModal, setShowDetailsModal] = useState(false)
 
   const { data: dues, isLoading } = useQuery({
     queryKey: ['studentDues', user?.organization_id, user?.id],
@@ -19,12 +18,7 @@ export default function StudentDues() {
       const { data, error } = await supabase
         .from('dues')
         .select(`
-          id,
-          title,
-          description,
-          amount,
-          status,
-          created_at,
+          id, title, description, amount, status, created_at,
           payments!left (amount_paid, student_id)
         `)
         .eq('organization_id', user.organization_id)
@@ -54,7 +48,8 @@ export default function StudentDues() {
   }
 
   function handleViewDetails(due) {
-    navigate(`/student/dues/${due.id}`)
+    setSelectedDue(due)
+    setShowDetailsModal(true)
   }
 
   return (
@@ -66,7 +61,6 @@ export default function StudentDues() {
           <p className="text-gray-600 mt-1">View and pay your church dues</p>
         </div>
 
-        {/* Dues Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
             <div className="col-span-full flex justify-center py-12">
@@ -74,11 +68,7 @@ export default function StudentDues() {
             </div>
           ) : dues?.length === 0 ? (
             <div className="col-span-full text-center py-12 bg-white rounded-xl shadow-sm">
-              <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
               <p className="text-gray-500">No active dues</p>
-              <p className="text-sm text-gray-400 mt-1">Check back later for new dues</p>
             </div>
           ) : (
             dues?.map((due) => {
@@ -90,65 +80,34 @@ export default function StudentDues() {
                 <div key={due.id} className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between mb-4">
                     <h3 className="font-semibold text-gray-900 text-lg">{due.title}</h3>
-                    <span
-                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                        status === 'completed'
-                          ? 'bg-green-100 text-green-700'
-                          : status === 'partial'
-                          ? 'bg-yellow-100 text-yellow-700'
-                          : 'bg-gray-100 text-gray-700'
-                      }`}
-                    >
+                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
+                      status === 'completed' ? 'bg-green-100 text-green-700' : 
+                      status === 'partial' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'
+                    }`}>
                       {status}
                     </span>
                   </div>
 
-                  {due.description && (
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{due.description}</p>
-                  )}
+                  {due.description && <p className="text-sm text-gray-600 mb-4 line-clamp-2">{due.description}</p>}
 
                   <div className="space-y-3 mb-4">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500">Total Amount</span>
                       <span className="font-semibold text-gray-900">₦{due.amount.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Paid</span>
-                      <span className="font-semibold text-green-600">₦{paid.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Remaining</span>
-                      <span className="font-semibold text-orange-600">₦{remaining.toLocaleString()}</span>
-                    </div>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="mb-4">
-                    <div className="flex justify-between text-xs text-gray-500 mb-1">
-                      <span>Progress</span>
-                      <span>{Math.round((paid / due.amount) * 100)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full transition-all ${
-                          status === 'completed' ? 'bg-green-600' : 'bg-primary-600'
-                        }`}
-                        style={{ width: `${(paid / due.amount) * 100}%` }}
-                      />
-                    </div>
                   </div>
 
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleViewDetails(due)}
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
                     >
                       Details
                     </button>
                     {status !== 'completed' && (
                       <button
                         onClick={() => handlePay(due)}
-                        className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
+                        className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700"
                       >
                         Pay
                       </button>
@@ -159,6 +118,28 @@ export default function StudentDues() {
             })
           )}
         </div>
+
+        {/* Details Modal Popup */}
+        {showDetailsModal && selectedDue && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md transition-colors">
+              <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">{selectedDue.title}</h2>
+              <div className="space-y-4">
+                <p className="text-gray-600 dark:text-gray-300">{selectedDue.description || "No description provided."}</p>
+                <div className="flex justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <span className="font-medium text-gray-700 dark:text-gray-400">Total Amount</span>
+                  <span className="font-semibold text-gray-900 dark:text-white">₦{selectedDue.amount.toLocaleString()}</span>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowDetailsModal(false)}
+                className="mt-6 w-full py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Payment Modal */}
         {showPaymentModal && selectedDue && (
