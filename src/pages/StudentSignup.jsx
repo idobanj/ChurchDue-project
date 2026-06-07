@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../services/supabaseClient'
+import BackButton from '../components/BackButton'
 
 export default function StudentSignup() {
   const { slug } = useParams()
@@ -115,6 +116,7 @@ export default function StudentSignup() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <BackButton />
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <svg className="w-12 h-12 text-primary-600" fill="currentColor" viewBox="0 0 24 24">
