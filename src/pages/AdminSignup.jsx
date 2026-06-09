@@ -145,7 +145,7 @@ export default function AdminSignup() {
                                 value={formData.churchName}
                                 onChange={handleChange}
                                 className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500'
-                                placeholder='e.g. RCF FUT Minna'
+                                placeholder='e.g. DLCF FUT Minna'
                             />
                         </div>
 
