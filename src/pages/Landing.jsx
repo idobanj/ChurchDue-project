@@ -140,7 +140,7 @@ export default function Landing() {
             {/* Footer */}
             <footer className='container mx-auto px-4 py-8 text-center text-blue-200'>
                 <p>
-                    &copy; 2026 Church Dues Management Platform. All rights
+                    &copy; {new Date().getFullYear()} Church Dues Management Platform. All rights
                     reserved.
                 </p>
             </footer>
