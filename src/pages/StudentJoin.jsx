@@ -4,6 +4,8 @@ import {useState} from 'react';
 import {useParams, useNavigate} from 'react-router-dom';
 import {supabase} from '../services/supabaseClient';
 import {useAuth} from '../contexts/AuthContext';
+import ThemeToggle from '../components/ThemeToggle';
+import BackButton from '../components/BackButton';
 
 export default function StudentJoin() {
     const {slug} = useParams();
@@ -91,6 +93,10 @@ export default function StudentJoin() {
 
     return (
         <div className='min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8'>
+            <BackButton />
+
+            
+
             <div className='sm:mx-auto sm:w-full sm:max-w-md'>
                 <div className='flex justify-center'>
                     <svg
