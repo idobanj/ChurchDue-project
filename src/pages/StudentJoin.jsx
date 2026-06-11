@@ -3,9 +3,9 @@
 import {useState} from 'react';
 import {useParams, useNavigate} from 'react-router-dom';
 import {supabase} from '../services/supabaseClient';
-import {useAuth} from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import ThemeToggle from '../components/ThemeToggle';
-import BackButton from '../components/BackButton';
+import BackButton from '../components/BackButton';  
 
 export default function StudentJoin() {
     const {slug} = useParams();
@@ -93,10 +93,12 @@ export default function StudentJoin() {
 
     return (
         <div className='min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8'>
-            <BackButton />
-
             
-
+            
+            <BackButton />
+                <div className='absolute top-2 right-4 p-4'>
+                    <ThemeToggle />
+                </div>
             <div className='sm:mx-auto sm:w-full sm:max-w-md'>
                 <div className='flex justify-center'>
                     <svg
@@ -165,7 +167,7 @@ export default function StudentJoin() {
                             </label>
                             <input
                                 type='date'
-                                required
+                               
                                 value={formData.dateOfBirth}
                                 onChange={(e) =>
                                     setFormData({
@@ -190,7 +192,7 @@ export default function StudentJoin() {
                                         password: e.target.value,
                                     })
                                 }
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text:gray-900 dark:text-white focus:outline focus:ring-primary-500 focus:border-primary-500'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white text-gray-900 focus:outline focus:ring-primary-500 focus:border-primary-500'
                                 placeholder='Create password'
                             />
                         </div>
@@ -208,7 +210,7 @@ export default function StudentJoin() {
                                         confirmPassword: e.target.value,
                                     })
                                 }
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-primary-500 focus:border-primary-500'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 focus:outline-none focus:ring-primary-500 focus:border-primary-500'
                                 placeholder='Confirm password'
                             />
                         </div>

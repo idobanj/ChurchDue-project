@@ -5,113 +5,86 @@ import { supabase } from '../services/supabaseClient'
 import BackButton from '../components/BackButton'
 
 export default function StudentSignup() {
-  const { slug } = useParams()
-  const navigate = useNavigate()
-  const { signUp } = useAuth()
-  const [organization, setOrganization] = useState(null)
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  const [organization, setOrganization] = useState(null);
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    dateOfBirth: '',
-  })
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [fetchingOrg, setFetchingOrg] = useState(true)
+      fullName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      dateOfBirth: '',
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [fetchingOrg, setFetchingOrg] = useState(true);
 
   useEffect(() => {
-    async function fetchOrganization() {
-      if (!slug) return
+      async function fetchOrganization() {
+          if (!slug) return;
+          const { data, error } = await supabase
+              .from('organizations')
+              .select('id, name, slug')
+              .eq('slug', slug)
+              .single();
 
-      const { data, error } = await supabase
-        .from('organizations')
-        .select('id, name, slug')
-        .eq('slug', slug)
-        .single()
-
-      if (error || !data) {
-        setError('Invalid invite link. Please check with your church admin.')
-      } else {
-        setOrganization(data)
+          if (error || !data) {
+              setError('Invalid invite link. Please check with your church admin.');
+          } else {
+              setOrganization(data);
+          }
+          setFetchingOrg(false);
       }
-      setFetchingOrg(false)
-    }
-
-    fetchOrganization()
-  }, [slug])
+      fetchOrganization();
+  }, [slug]);
 
   function handleChange(e) {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+      setFormData({ ...formData, [e.target.name]: e.target.value });
   }
 
   async function handleSubmit(e) {
-    e.preventDefault()
-    setError('')
+      e.preventDefault();
+      setError('');
 
-    if (!organization) {
-      setError('Invalid organization invite link')
-      return
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match')
-      return
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters')
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName,
-            date_of_birth: formData.dateOfBirth,
-          },
-        },
-      })
-
-      if (authError) throw authError
-
-      if (authData.user) {
-        // Create student user record linked to organization
-        const { error: userError } = await supabase
-          .from('users')
-          .insert({
-            id: authData.user.id,
-            organization_id: organization.id,
-            role: 'student',
-            full_name: formData.fullName,
-            email: formData.email,
-            date_of_birth: formData.dateOfBirth,
-          })
-
-        if (userError) throw userError
-
-        navigate('/student/login', {
-          state: { message: 'Account created! Please log in with your credentials.' }
-        })
+      if (!organization) {
+          setError('Invalid organization invite link');
+          return;
       }
-    } catch (err) {
-      setError(err.message)
-    }
 
-    setLoading(false)
-  }
+      if (formData.password !== formData.confirmPassword) {
+          setError('Passwords do not match');
+          return;
+      }
 
-  if (fetchingOrg) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    )
+      setLoading(true);
+
+      try {
+          // Register Auth User
+          // We pass the organization_id in the metadata
+          const { error: authError } = await supabase.auth.signUp({
+              email: formData.email,
+              password: formData.password,
+              options: {
+                  data: {
+                      full_name: formData.fullName,
+                      date_of_birth: formData.dateOfBirth,
+                      role: 'student',
+                      organization_id: organization.id // Sent to trigger
+                  },
+              },
+          });
+
+          if (authError) throw authError;
+
+          // SUCCESS: Inform user to verify
+          alert("Account created! Please check your email to verify your account before you can log in.");
+          navigate('/student/login');
+          
+      } catch (err) {
+          setError(err.message);
+      } finally {
+          setLoading(false);
+      }
   }
 
   return (

@@ -1,15 +1,13 @@
 /** @format */
 
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../services/supabaseClient';
+import {useState} from 'react';
+import {Link, useNavigate} from 'react-router-dom';
+import {useAuth} from '../contexts/AuthContext';
+import {supabase} from '../services/supabaseClient';
 import BackButton from '../components/BackButton';
-
 
 export default function AdminSignup() {
     const navigate = useNavigate();
-    const { signUp } = useAuth();
     const [formData, setFormData] = useState({
         churchName: '',
         fullName: '',
@@ -26,78 +24,55 @@ export default function AdminSignup() {
 
     async function handleSubmit(e) {
         e.preventDefault();
-        console.log('AdminSignup: handleSubmit triggered');
         setError('');
 
         if (formData.password !== formData.confirmPassword) {
-            console.log('AdminSignup: Passwords do not match');
             setError('Passwords do not match');
             return;
         }
 
         if (formData.password.length < 6) {
-            console.log('AdminSignup: Password too short');
             setError('Password must be at least 6 characters');
             return;
         }
 
         setLoading(true);
-        let createdOrgId = null;
 
         try {
-            // 1. Generate a URL-friendly unique slug from the Church/Organization Name
-            const slug = formData.churchName
-                .toLowerCase()
-                .trim()
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/(^-|-$)+/g, '');
-
-            console.log('AdminSignup: Registering organization with slug:', slug);
-
-            // 2. Insert the Organization into your public custom tables
+            // 1. Create Organization
+            const slug = formData.churchName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
             const { data: orgData, error: orgError } = await supabase
                 .from('organizations')
-                .insert([
-                    {
-                        name: formData.churchName,
-                        slug: slug,
-                        paystack_connected: false
-                    }
-                ])
+                .insert([{ name: formData.churchName, slug, paystack_connected: false }])
                 .select()
                 .single();
 
             if (orgError) throw orgError;
-            
-            createdOrgId = orgData.id;
-            console.log('AdminSignup: Organization successfully provisioned with ID:', createdOrgId);
 
-            // 3. Register the Admin user and pass metadata directly down into your PostgreSQL database trigger
-            const { data: authData, error: authError } = await signUp(
-                formData.email,
-                formData.password,
-                {
-                    fullName: formData.fullName,
-                    role: 'admin',
-                    organization_id: createdOrgId
+            // 2. Register Auth User
+            const { error: authError } = await supabase.auth.signUp({
+                email: formData.email,
+                password: formData.password,
+                options: {
+                    data: {
+                        full_name: formData.fullName,
+                        role: 'admin',
+                        organization_id: orgData.id
+                    }
                 }
-            );
+            });
 
             if (authError) {
-                console.error('AdminSignup: Auth registration failed. Commencing clean rollback of organization:', createdOrgId);
-                // Rollback database side allocation to maintain database integrity
-                await supabase.from('organizations').delete().eq('id', createdOrgId);
+                // Rollback organization if auth fails
+                await supabase.from('organizations').delete().eq('id', orgData.id);
                 throw authError;
             }
 
-            // 4. On successful pipeline completion, route to the dashboard
-            if (authData?.user) {
-                console.log('AdminSignup: Registration pipeline complete. Redirecting...');
-                navigate('/admin/dashboard');
-            }
+            // 3. SUCCESS: Tell the user to verify their email
+            alert("Account created! Please check your email inbox to verify your account before logging in.");
+            navigate('/admin/login');
 
         } catch (err) {
-            console.error('Signup pipeline failure process log:', err);
             setError(err.message || 'An error occurred during account setup.');
         } finally {
             setLoading(false);
@@ -134,7 +109,9 @@ export default function AdminSignup() {
 
                     <form className='space-y-6' onSubmit={handleSubmit}>
                         <div>
-                            <label htmlFor='churchName' className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
+                            <label
+                                htmlFor='churchName'
+                                className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
                                 Church / Fellowship Name
                             </label>
                             <input
@@ -144,13 +121,15 @@ export default function AdminSignup() {
                                 required
                                 value={formData.churchName}
                                 onChange={handleChange}
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500'
                                 placeholder='e.g. DLCF FUT Minna'
                             />
                         </div>
 
                         <div>
-                            <label htmlFor='fullName' className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
+                            <label
+                                htmlFor='fullName'
+                                className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
                                 Admin Full Name
                             </label>
                             <input
@@ -160,13 +139,15 @@ export default function AdminSignup() {
                                 required
                                 value={formData.fullName}
                                 onChange={handleChange}
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500'
                                 placeholder='John Doe'
                             />
                         </div>
 
                         <div>
-                            <label htmlFor='email' className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
+                            <label
+                                htmlFor='email'
+                                className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
                                 Email Address
                             </label>
                             <input
@@ -176,13 +157,15 @@ export default function AdminSignup() {
                                 required
                                 value={formData.email}
                                 onChange={handleChange}
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900  focus:outline-none focus:ring-blue-500 focus:border-blue-500'
                                 placeholder='admin@church.org'
                             />
                         </div>
 
                         <div>
-                            <label htmlFor='password' className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
+                            <label
+                                htmlFor='password'
+                                className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
                                 Password
                             </label>
                             <input
@@ -192,13 +175,15 @@ export default function AdminSignup() {
                                 required
                                 value={formData.password}
                                 onChange={handleChange}
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900  focus:outline-none focus:ring-blue-500 focus:border-blue-500'
                                 placeholder='••••••••'
                             />
                         </div>
 
                         <div>
-                            <label htmlFor='confirmPassword' className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
+                            <label
+                                htmlFor='confirmPassword'
+                                className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
                                 Confirm Password
                             </label>
                             <input
@@ -208,7 +193,7 @@ export default function AdminSignup() {
                                 required
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500'
                                 placeholder='••••••••'
                             />
                         </div>
