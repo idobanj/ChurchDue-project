@@ -57,22 +57,20 @@ export default function PaymentModal({ due, onClose }) {
           student_id: currentUser.id,
         },
         callback: async (response) => {
-          // Verify payment on backend via webhook
-          // For now, create pending payment record
-          const { error } = await supabase
-            .from('payments')
-            .insert({
-              due_id: due.id,
-              student_id: currentUser.id,
-              amount_paid: paymentAmount,
-              paystack_reference: response.reference,
-              status: 'pending', // Will be updated by webhook
+          // Verify payment via our Edge Function
+          const { data, error } = await supabase
+            .functions.invoke('verify-paystack-payment', {
+              body: {
+                reference: response.reference,
+                due_id: due.id,
+                expectedAmount: paymentAmount * 100, // in kobo
+              }
             })
 
           if (error) throw error
 
           onClose()
-          alert('Payment initiated successfully! Please wait for confirmation.')
+          alert('Payment verified and recorded successfully!')
         },
         onClose: () => {
           setLoading(false)
