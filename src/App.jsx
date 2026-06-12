@@ -20,6 +20,8 @@ import DuesManagement from './pages/admin/DuesManagement';
 import PaymentsPage from './pages/admin/PaymentsPage';
 import RefundRequests from './pages/admin/RefundRequests';
 import StudentsPage from './pages/admin/StudentsPage';
+// stendent ledger page
+import AdminStudentLedger from './pages/admin/AdminStudentLedger';
 
 // Student Pages
 import StudentDashboard from './pages/student/StudentDashboard';
@@ -45,22 +47,99 @@ function AppRoutes() {
             <Route path='/admin/signup' element={<AdminSignup />} />
 
             {/* Admin Routes */}
-            <Route path='/admin/dashboard' element={<ProtectedRoute expectedRole="admin"><AdminDashboard /></ProtectedRoute>} />
-            <Route path='/admin/dues' element={<ProtectedRoute expectedRole="admin"><DuesManagement /></ProtectedRoute>} />
-            <Route path='/admin/payments' element={<ProtectedRoute expectedRole="admin"><PaymentsPage /></ProtectedRoute>} />
-            <Route path='/admin/students' element={<ProtectedRoute expectedRole="admin"><StudentsPage /></ProtectedRoute>} />
-            <Route path='/admin/refunds' element={<ProtectedRoute expectedRole="admin"><RefundRequests /></ProtectedRoute>} />
-            <Route path='/admin/settings' element={<ProtectedRoute expectedRole="admin"><AdminSettings /></ProtectedRoute>} />
-            <Route path='/admin/due/:id' element={<ProtectedRoute expectedRole="admin"><AdminDueDetails /></ProtectedRoute>} />
-
+            <Route
+                path='/admin/dashboard'
+                element={
+                    <ProtectedRoute expectedRole='admin'>
+                        <AdminDashboard />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path='/admin/dues'
+                element={
+                    <ProtectedRoute expectedRole='admin'>
+                        <DuesManagement />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path='/admin/payments'
+                element={
+                    <ProtectedRoute expectedRole='admin'>
+                        <PaymentsPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path='/admin/students'
+                element={
+                    <ProtectedRoute expectedRole='admin'>
+                        <StudentsPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path='/admin/refunds'
+                element={
+                    <ProtectedRoute expectedRole='admin'>
+                        <RefundRequests />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path='/admin/settings'
+                element={
+                    <ProtectedRoute expectedRole='admin'>
+                        <AdminSettings />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path='/admin/due/:id'
+                element={
+                    <ProtectedRoute expectedRole='admin'>
+                        <AdminDueDetails />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path='/admin/student/:id/ledger'
+                element={
+                    <ProtectedRoute expectedRole='admin'>
+                        <AdminStudentLedger />
+                    </ProtectedRoute>
+                }
+            />
             <Route path='/student/login' element={<StudentLogin />} />
             <Route path='/student/signup' element={<StudentSignup />} />
             <Route path='/join/:slug' element={<StudentJoin />} />
 
             {/* Student Routes */}
-            <Route path='/student/dashboard' element={<ProtectedRoute expectedRole="student"><StudentDashboard /></ProtectedRoute>} />
-            <Route path='/student/dues' element={<ProtectedRoute expectedRole="student"><StudentDues /></ProtectedRoute>} />
-            <Route path='/student/due/:id' element={<ProtectedRoute expectedRole="student"><StudentDueDetails /></ProtectedRoute>} />
+            <Route
+                path='/student/dashboard'
+                element={
+                    <ProtectedRoute expectedRole='student'>
+                        <StudentDashboard />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path='/student/dues'
+                element={
+                    <ProtectedRoute expectedRole='student'>
+                        <StudentDues />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path='/student/due/:id'
+                element={
+                    <ProtectedRoute expectedRole='student'>
+                        <StudentDueDetails />
+                    </ProtectedRoute>
+                }
+            />
 
             <Route path='/forgot-password' element={<ForgotPassword />} />
             <Route path='/reset-password' element={<ResetPassword />} />

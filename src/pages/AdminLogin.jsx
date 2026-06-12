@@ -21,7 +21,12 @@ export default function AdminLogin() {
         const {data, error} = await signIn(email, password);
 
         if (error) {
-            setError(error.message);
+            // Show user-friendly message for timeout errors
+            if (error.message && error.message.includes('Request timed out')) {
+                setError('Connection timeout. Please check your internet connection and try again.');
+            } else {
+                setError(error.message);
+            }
             setLoading(false);
             return;
         }
