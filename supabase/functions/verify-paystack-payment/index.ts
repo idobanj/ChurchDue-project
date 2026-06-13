@@ -26,10 +26,14 @@ serve(async (req) => {
 
     // Validate fields
     if (!reference || !due_id || !expectedAmount) {
-      return new Response(JSON.stringify({ error: 'Missing fields', received: body }), {
+      console.error("VALIDATION FAILED. Received:", { reference, due_id, expectedAmount });
+      return new Response(JSON.stringify({ 
+        error: 'Missing fields', 
+        received: { reference, due_id, expectedAmount } 
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400
-      })
+      });
     }
 
     // 3. Verify with Paystack
