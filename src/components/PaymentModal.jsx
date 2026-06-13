@@ -69,6 +69,19 @@ export default function PaymentModal({ due, onClose }) {
           supabase.functions.invoke('verify-paystack-payment', {
             body: payload,
           })
+          .then(({ data, error }) => {
+            if (error) {
+              // This will now show the actual error message sent by your index.ts
+              throw new Error(error.message || 'Verification failed');
+            }
+            alert('Payment Successful!');
+            onClose();
+          })
+          .catch(err => {
+            console.error("UI ERROR:", err);
+            setError(err.message); // This displays "Amount mismatch" or "Paystack verification failed"
+            setLoading(false);
+          });
         },
         onClose: () => {
           setLoading(false)
@@ -81,9 +94,15 @@ export default function PaymentModal({ due, onClose }) {
         setError('Paystack not loaded. Please check your connection.')
         setLoading(false)
       }
-    } catch (err) {
-      setError(err.message)
-      setLoading(false)
+    } catch (error) {
+      console.error("CRITICAL ERROR:", error);
+      return new Response(JSON.stringify({ 
+        error: error.message,
+        stack: error.stack // This will show you exactly which line failed
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400
+      })
     }
   }
 
