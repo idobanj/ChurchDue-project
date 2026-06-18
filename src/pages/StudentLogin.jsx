@@ -59,7 +59,7 @@ export default function StudentLogin() {
             </div>
 
             <div className='mt-8 sm:mx-auto sm:w-full sm:max-w-md'>
-                <div className='bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200 dark:border-y-gray-700'>
+                <div className='bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200 dark:border-gray-700'>
                     {error && (
                         <div className='mb-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg'>
                             {error}
@@ -81,7 +81,7 @@ export default function StudentLogin() {
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-700'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white'
                                 placeholder='student@university.edu'
                             />
                         </div>
@@ -100,7 +100,7 @@ export default function StudentLogin() {
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-800'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white'
                                 placeholder='Enter your password'
                             />
                         </div>
@@ -109,7 +109,7 @@ export default function StudentLogin() {
                             <div className='text-sm'>
                                 <Link
                                     to='/forgot-password'
-                                    className='font-medium text-primary-600 hover:text-primary-500 dark:text-blue-400'>
+                                    className='font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400'>
                                     Forgot your password?
                                 </Link>
                             </div>

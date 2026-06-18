@@ -105,7 +105,7 @@ export default function StudentSignup() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200 dark:border-gray-700">
           {error && (
             <div className="mb-4 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium border border-red-200 dark:border-red-800 px-4 py-3 ">
               {error}
@@ -141,7 +141,7 @@ export default function StudentSignup() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                 placeholder="student@university.edu"
               />
             </div>
@@ -157,7 +157,7 @@ export default function StudentSignup() {
                 required
                 value={formData.dateOfBirth}
                 onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 focus:outline-none text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
 
@@ -215,7 +215,7 @@ export default function StudentSignup() {
             <div className="mt-6">
               <Link
                 to="/student/login"
-                className="w-full flex justify-center py-2 px-4 border border-primary-600 dark:border-blue-500 rounded-lg shadow-sm text-sm font-medium text-primary-600 dark:text-blue-400 bg-white dark:bg-gray-700 hover:bg-primary-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                className="w-full flex justify-center py-2 px-4 border border-primary-600 dark:border-primary-500 rounded-lg shadow-sm text-sm font-medium text-primary-600 dark:text-primary-400 bg-white dark:bg-gray-700 hover:bg-primary-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               >
                 Sign in instead
               </Link>

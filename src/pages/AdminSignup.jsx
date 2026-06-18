@@ -121,7 +121,7 @@ export default function AdminSignup() {
                                 required
                                 value={formData.churchName}
                                 onChange={handleChange}
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500'
                                 placeholder='e.g. DLCF FUT Minna'
                             />
                         </div>
@@ -139,7 +139,7 @@ export default function AdminSignup() {
                                 required
                                 value={formData.fullName}
                                 onChange={handleChange}
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500'
                                 placeholder='John Doe'
                             />
                         </div>
@@ -157,7 +157,7 @@ export default function AdminSignup() {
                                 required
                                 value={formData.email}
                                 onChange={handleChange}
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900  focus:outline-none focus:ring-blue-500 focus:border-blue-500'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500'
                                 placeholder='admin@church.org'
                             />
                         </div>
@@ -175,7 +175,7 @@ export default function AdminSignup() {
                                 required
                                 value={formData.password}
                                 onChange={handleChange}
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900  focus:outline-none focus:ring-blue-500 focus:border-blue-500'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500'
                                 placeholder='••••••••'
                             />
                         </div>
@@ -193,7 +193,7 @@ export default function AdminSignup() {
                                 required
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500'
+                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500'
                                 placeholder='••••••••'
                             />
                         </div>
