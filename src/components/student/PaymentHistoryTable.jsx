@@ -16,18 +16,18 @@ export default function PaymentHistoryTable({ payments }) {
   });
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">Payment History</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Payment History</h2>
         <div className="flex items-center space-x-2 text-sm">
           <button
             onClick={() => {
               setSortBy('date');
               setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
             }}
-            className={`px-3 py-1 rounded border-gray-300 hover:bg-gray-50 ${
+            className={`px-3 py-1 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200 ${
               sortBy === 'date' && sortOrder === 'desc'
-                ? 'bg-primary-50 text-primary-600'
+                ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/40 dark:text-primary-300'
                 : ''
             }`}
           >
@@ -44,9 +44,9 @@ export default function PaymentHistoryTable({ payments }) {
               setSortBy('amount');
               setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
             }}
-            className={`px-3 py-1 rounded border-gray-300 hover:bg-gray-50 ${
+            className={`px-3 py-1 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200 ${
               sortBy === 'amount' && sortOrder === 'desc'
-                ? 'bg-primary-50 text-primary-600'
+                ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/40 dark:text-primary-300'
                 : ''
             }`}
           >
@@ -63,48 +63,48 @@ export default function PaymentHistoryTable({ payments }) {
 
       {sortedPayments.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-gray-500">No payment history yet</p>
+          <p className="text-gray-500 dark:text-gray-400">No payment history yet</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b">
-                <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">
+              <tr className="border-b border-gray-200 dark:border-gray-700">
+                <th className="text-left px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">
                   Date
                 </th>
-                <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">
+                <th className="text-left px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">
                   Amount (₦)
                 </th>
-                <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">
+                <th className="text-left px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">
                   Reference
                 </th>
-                <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">
+                <th className="text-left px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">
                   Status
                 </th>
               </tr>
             </thead>
             <tbody>
               {sortedPayments.map((payment) => (
-                <tr key={payment.id} className="border-t hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm text-gray-900">
+                <tr key={payment.id} className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
                     {new Date(payment.payment_date || payment.paid_at).toLocaleDateString()}
                   </td>
-                  <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                  <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
                     ₦{Number(payment.amount || payment.amount_paid).toLocaleString()}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
+                  <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                     {payment.reference || '-'}
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       payment.status === 'completed' || payment.status === 'success'
-                        ? 'bg-green-100 text-green-800'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300'
                         : payment.status === 'pending' || payment.status === 'processing'
-                          ? 'bg-yellow-100 text-yellow-800'
+                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300'
                           : payment.status === 'failed' || payment.status === 'rejected'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-gray-100 text-gray-800'
+                            ? 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300'
+                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                     }`}
                       >
                       {payment.status?.charAt(0).toUpperCase() + payment.status?.slice(1)?.toLowerCase() || 'Completed'}
