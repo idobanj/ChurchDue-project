@@ -47,10 +47,10 @@ export default function StudentsPage() {
             <AdminSidebar />
             <div className='flex-1 p-4 md:p-8'>
                 <div className='mb-8'>
-                    <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-200'>
+                    <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-50'>
                         Students
                     </h1>
-                    <p className='text-gray-600 mt-1'>
+                    <p className='text-gray-600 dark:text-gray-400 mt-1'>
                         View and manage all students in your organization
                     </p>
                 </div>
@@ -62,9 +62,9 @@ export default function StudentsPage() {
                             <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600'></div>
                         </div>
                     ) : students?.length === 0 ? (
-                        <div className='col-span-full text-center py-12 bg-white rounded-xl shadow-sm'>
+                        <div className='col-span-full text-center py-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm'>
                             <svg
-                                className='w-16 h-16 text-gray-300 mx-auto mb-4'
+                                className='w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4'
                                 fill='none'
                                 stroke='currentColor'
                                 viewBox='0 0 24 24'>
@@ -75,10 +75,10 @@ export default function StudentsPage() {
                                     d='M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'
                                 />
                             </svg>
-                            <p className='text-gray-500'>
+                            <p className='text-gray-500 dark:text-gray-400'>
                                 No students have joined yet
                             </p>
-                            <p className='text-sm text-gray-400 mt-1'>
+                            <p className='text-sm text-gray-400 dark:text-gray-500 mt-1'>
                                 Share your invite link to onboard students
                             </p>
                         </div>
@@ -86,9 +86,9 @@ export default function StudentsPage() {
                         students?.map((student) => (
                             <div
                                 key={student.id}
-                                className='bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow'>
+                                className='bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow'>
                                 <div className='flex items-start space-x-4'>
-                                    <div className='w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0'>
+                                    <div className='w-16 h-16 bg-primary-100 dark:bg-primary-900/50 rounded-full flex items-center justify-center flex-shrink-0'>
                                         {student.profile_picture_url ? (
                                             <img
                                                 src={
@@ -98,27 +98,27 @@ export default function StudentsPage() {
                                                 className='w-full h-full rounded-full object-cover'
                                             />
                                         ) : (
-                                            <span className='text-2xl font-semibold text-primary-600'>
+                                            <span className='text-2xl font-semibold text-primary-600 dark:text-primary-300'>
                                                 {student.full_name?.[0]?.toUpperCase()}
                                             </span>
                                         )}
                                     </div>
                                     <div className='flex-1 min-w-0'>
-                                        <h3 className='font-semibold text-gray-900 truncate'>
+                                        <h3 className='font-semibold text-gray-900 dark:text-gray-100 truncate'>
                                             {student.full_name}
                                         </h3>
-                                        <p className='text-sm text-gray-500 truncate'>
+                                        <p className='text-sm text-gray-500 dark:text-gray-400 truncate'>
                                             {student.email}
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className='mt-4 pt-4 border-t grid grid-cols-2 gap-4'>
+                                <div className='mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 grid grid-cols-2 gap-4'>
                                     <div>
-                                        <p className='text-xs text-gray-500'>
+                                        <p className='text-xs text-gray-500 dark:text-gray-400'>
                                             Total Paid
                                         </p>
-                                        <p className='text-lg font-semibold text-green-600'>
+                                        <p className='text-lg font-semibold text-green-600 dark:text-green-400'>
                                             ₦
                                             {getTotalPaid(
                                                 student,
@@ -126,10 +126,10 @@ export default function StudentsPage() {
                                         </p>
                                     </div>
                                     <div>
-                                        <p className='text-xs text-gray-500'>
+                                        <p className='text-xs text-gray-500 dark:text-gray-400'>
                                             Payment Status
                                         </p>
-                                        <p className='text-sm font-medium text-gray-700'>
+                                        <p className='text-sm font-medium text-gray-700 dark:text-gray-200'>
                                             Active
                                         </p>
                                     </div>
@@ -141,7 +141,7 @@ export default function StudentsPage() {
                                             `/admin/student/${student.id}/ledger`,
                                         )
                                     }
-                                    
+
                                     className='mt-4 w-full px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700'>
                                     Payment History
                                 </button>
