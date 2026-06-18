@@ -65,10 +65,10 @@ export default function StudentDueDetails() {
         <StudentSidebar />
         <div className="flex-1 p-4 md:p-8">
           <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-gray-900">Due not found</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Due not found</h2>
             <button
               onClick={() => navigate('/student/dues')}
-              className="mt-4 text-primary-600 hover:text-primary-500 "
+              className="mt-4 text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
             >
               Back to Dues
             </button>
@@ -98,35 +98,35 @@ export default function StudentDueDetails() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Due Details */}
-          <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">{due.title}</h1>
-            <p className="text-gray-600 mb-6">{due.description}</p>
+          <div className="lg:col-span-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-6">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{due.title}</h1>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">{due.description}</p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-sm text-gray-500">Total Amount</p>
-                <p className="text-2xl font-bold text-gray-900">₦{due.amount.toLocaleString()}</p>
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Total Amount</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">₦{due.amount.toLocaleString()}</p>
               </div>
-              <div className="bg-green-50 rounded-lg p-4">
-                <p className="text-sm text-gray-500">Total Paid</p>
-                <p className="text-2xl font-bold text-green-600">₦{totalPaid.toLocaleString()}</p>
+              <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Total Paid</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">₦{totalPaid.toLocaleString()}</p>
               </div>
-              <div className="bg-orange-50 rounded-lg p-4">
-                <p className="text-sm text-gray-500">Remaining</p>
-                <p className="text-2xl font-bold text-orange-600">₦{remaining.toLocaleString()}</p>
+              <div className="bg-orange-50 dark:bg-orange-900/30 rounded-lg p-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Remaining</p>
+                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">₦{remaining.toLocaleString()}</p>
               </div>
             </div>
 
             {/* Progress Bar */}
             <div className="mb-6">
-              <div className="flex justify-between text-sm text-gray-500 mb-2">
+              <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mb-2">
                 <span>Payment Progress</span>
                 <span>{Math.round((totalPaid / due.amount) * 100)}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                 <div
                   className={`h-3 rounded-full transition-all ${
-                    isFullyPaid ? 'bg-green-600' : 'bg-primary-600'
+                    isFullyPaid ? 'bg-green-600 dark:bg-green-500' : 'bg-primary-600 dark:bg-primary-500'
                   }`}
                   style={{ width: `${(totalPaid / due.amount) * 100}%` }}
                 />
@@ -146,7 +146,7 @@ export default function StudentDueDetails() {
               {totalPaid > 0 && (
                 <button
                   onClick={() => setShowRefundModal(true)}
-                  className="flex-1 border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                  className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
                   Request Refund
                 </button>

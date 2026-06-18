@@ -81,8 +81,8 @@ export default function StudentDues() {
                             <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600'></div>
                         </div>
                     ) : dues?.length === 0 ? (
-                        <div className='col-span-full text-center py-12 bg-white rounded-xl shadow-sm'>
-                            <p className='text-gray-500'>No active dues</p>
+                        <div className='col-span-full text-center py-12 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm'>
+                            <p className='text-gray-500 dark:text-gray-400'>No active dues</p>
                         </div>
                     ) : (
                         dues?.map((due) => {
@@ -93,35 +93,35 @@ export default function StudentDues() {
                             return (
                                 <div
                                     key={due.id}
-                                    className='bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow'>
+                                    className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow'>
                                     <div className='flex items-start justify-between mb-4'>
-                                        <h3 className='font-semibold text-gray-900 text-lg'>
+                                        <h3 className='font-semibold text-gray-900 dark:text-gray-100 text-lg'>
                                             {due.title}
                                         </h3>
                                         <span
                                             className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
                                                 status === 'completed'
-                                                    ? 'bg-green-100 text-green-700'
+                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
                                                     : status === 'partial'
-                                                      ? 'bg-yellow-100 text-yellow-700'
-                                                      : 'bg-gray-100 text-gray-700'
+                                                      ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300'
+                                                      : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
                                             }`}>
                                             {status}
                                         </span>
                                     </div>
 
                                     {due.description && (
-                                        <p className='text-sm text-gray-600 mb-4 line-clamp-2'>
+                                        <p className='text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2'>
                                             {due.description}
                                         </p>
                                     )}
 
                                     <div className='space-y-3 mb-4'>
                                         <div className='flex justify-between text-sm'>
-                                            <span className='text-gray-500'>
+                                            <span className='text-gray-500 dark:text-gray-400'>
                                                 Total Amount
                                             </span>
-                                            <span className='font-semibold text-gray-900'>
+                                            <span className='font-semibold text-gray-900 dark:text-gray-100'>
                                                 ₦{due.amount.toLocaleString()}
                                             </span>
                                         </div>
@@ -132,7 +132,7 @@ export default function StudentDues() {
                                             onClick={() =>
                                                 handleViewDetails(due)
                                             }
-                                            className='flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50'>
+                                            className='flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'>
                                             Details
                                         </button>
                                         {status !== 'completed' && (

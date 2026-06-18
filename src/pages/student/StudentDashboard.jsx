@@ -67,56 +67,56 @@ export default function StudentDashboard() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Dues</p>
-                <p className="text-3xl font-bold text-gray-900">₦{stats?.totalDues.toLocaleString() || 0}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Total Dues</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">₦{stats?.totalDues.toLocaleString() || 0}</p>
               </div>
-              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/50 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-primary-600 dark:text-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Paid</p>
-                <p className="text-3xl font-bold text-green-600">₦{stats?.totalPaid.toLocaleString() || 0}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Total Paid</p>
+                <p className="text-3xl font-bold text-green-600 dark:text-green-400">₦{stats?.totalPaid.toLocaleString() || 0}</p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-green-600 dark:text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Remaining</p>
-                <p className="text-3xl font-bold text-orange-600">₦{stats?.totalRemaining.toLocaleString() || 0}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Remaining</p>
+                <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">₦{stats?.totalRemaining.toLocaleString() || 0}</p>
               </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/50 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-orange-600 dark:text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Completed</p>
-                <p className="text-3xl font-bold text-blue-600">{stats?.completedCount || 0}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Completed</p>
+                <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{stats?.completedCount || 0}</p>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -125,28 +125,28 @@ export default function StudentDashboard() {
         </div>
 
         {/* Recent Payments */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Payments</h2>
-            <Link to="/student/dues" className="text-sm text-primary-600 hover:text-primary-500">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Payments</h2>
+            <Link to="/student/dues" className="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300">
               View all dues
             </Link>
           </div>
           <div className="space-y-3">
             {recentPayments?.length === 0 ? (
-              <p className="text-gray-500 text-sm">No payments yet</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">No payments yet</p>
             ) : (
               recentPayments?.map((payment) => (
-                <div key={payment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={payment.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                   <div>
-                    <p className="font-medium text-gray-900">{payment.dues?.title}</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{payment.dues?.title}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       {new Date(payment.paid_at).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-green-600">₦{payment.amount_paid?.toLocaleString()}</p>
-                    <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                    <p className="font-semibold text-green-600 dark:text-green-400">₦{payment.amount_paid?.toLocaleString()}</p>
+                    <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">
                       Paid
                     </span>
                   </div>
