@@ -19,9 +19,9 @@ export default function StudentDashboard() {
       const totalPaid = payments?.reduce((sum, p) => sum + (p.amount_paid || 0), 0) || 0
 
       // Fetch student's dues
-      const { data: dues } = await supabase
+      const { data: dues,error } = await supabase
         .from('dues')
-        .select('amount, status')
+        .select('id, title, amount, organization_id, status')
         .eq('organization_id', user.organization_id)
 
       const totalDues = dues?.reduce((sum, d) => sum + (d.amount || 0), 0) || 0
@@ -61,8 +61,8 @@ export default function StudentDashboard() {
       <StudentSidebar />
       <div className="flex-1 p-4 md:p-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">My Dashboard</h1>
-          <p className="text-gray-600 mt-1">Overview of your dues and payments</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Overview of your dues and payments</p>
         </div>
 
         {/* Stats Cards */}

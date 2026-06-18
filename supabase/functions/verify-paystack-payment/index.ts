@@ -389,7 +389,7 @@ serve(async (req) => {
         due_id,
         amount_paid: amountInNaira,
         paystack_reference: reference,
-        status: 'success',
+        status: 'completed',
         paid_at: new Date().toISOString(),
       })
       .select('id, amount_paid, paystack_reference, status, paid_at, created_at')

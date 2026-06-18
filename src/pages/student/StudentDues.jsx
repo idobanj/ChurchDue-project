@@ -67,10 +67,10 @@ export default function StudentDues() {
             <StudentSidebar />
             <div className='flex-1 p-4 md:p-8'>
                 <div className='mb-8'>
-                    <h1 className='text-3xl font-bold text-gray-900'>
+                    <h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
                         My Dues
                     </h1>
-                    <p className='text-gray-600 mt-1'>
+                    <p className='text-gray-600 dark:text-gray-400 mt-1'>
                         View and pay your church dues
                     </p>
                 </div>
