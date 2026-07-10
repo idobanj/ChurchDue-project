@@ -10,6 +10,15 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
+
+
+    // Add this function inside your AuthProvider component
+    const resetPassword = async (email) => {
+        return await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/update-password`, // Change this to your actual route
+        });
+    };
+
     // This function will NOT block the app from loading if it fails
     const fetchProfile = async (sessionUser) => {
         const { data: profile, error } = await supabase
@@ -73,7 +82,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut }}>
+        <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut, resetPassword }}>
             {!loading && children}
         </AuthContext.Provider>
     );
