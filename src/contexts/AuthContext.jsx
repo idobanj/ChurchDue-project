@@ -1,6 +1,6 @@
 /** @format */
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from '../services/supabaseClient';
 
 const AuthContext = createContext({});
@@ -10,6 +10,11 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [initializing, setInitializing] = useState(true);
+
+    const loadingRef = useRef(loading);
+    useEffect(() => {
+        loadingRef.current = loading;
+    }, [loading]);
 
     // Add this function inside your AuthProvider component
     const resetPassword = async (email) => {
@@ -45,6 +50,7 @@ export function AuthProvider({ children }) {
 
     useEffect(() => {
         let active = true;
+        let subscription = null;
 
         const initializeAuth = async () => {
             setLoading(true);
@@ -56,6 +62,28 @@ export function AuthProvider({ children }) {
                     } else {
                         setUser(null);
                     }
+                }
+
+                // Register subscription only after initial session check completes
+                if (active) {
+                    const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
+                        if (!active) return;
+                        
+                        if (session?.user) {
+                            setUser(currentUser => {
+                                const isNewUser = !currentUser || currentUser.id !== session.user.id;
+                                if (isNewUser && !loadingRef.current) {
+                                    // background fetch
+                                    fetchProfile(session.user);
+                                }
+                                return currentUser;
+                            });
+                        } else {
+                            setUser(null);
+                            setLoading(false);
+                        }
+                    });
+                    subscription = data.subscription;
                 }
             } catch (err) {
                 console.error("Error in initializeAuth:", err);
@@ -69,27 +97,11 @@ export function AuthProvider({ children }) {
 
         initializeAuth();
 
-        // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (!active) return;
-            
-            if (session?.user) {
-                if (event === 'SIGNED_IN') {
-                    setLoading(true);
-                    await fetchProfile(session.user);
-                    setLoading(false);
-                } else {
-                    await fetchProfile(session.user);
-                }
-            } else {
-                setUser(null);
-                setLoading(false);
-            }
-        });
-
         return () => {
             active = false;
-            subscription.unsubscribe();
+            if (subscription) {
+                subscription.unsubscribe();
+            }
         };
     }, []);
 
