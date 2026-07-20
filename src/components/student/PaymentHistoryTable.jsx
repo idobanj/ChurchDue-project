@@ -15,6 +15,9 @@ export default function PaymentHistoryTable({ payments }) {
     return 0;
   });
 
+  // Check if we should display the "Due" column (if at least one payment has dues.title)
+  const showDueColumn = payments?.some(p => p.dues?.title);
+
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-6">
       <div className="flex items-center justify-between mb-4">
@@ -70,6 +73,11 @@ export default function PaymentHistoryTable({ payments }) {
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700">
+                {showDueColumn && (
+                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                    Due Item
+                  </th>
+                )}
                 <th className="text-left px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300">
                   Date
                 </th>
@@ -87,6 +95,11 @@ export default function PaymentHistoryTable({ payments }) {
             <tbody>
               {sortedPayments.map((payment) => (
                 <tr key={payment.id} className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                  {showDueColumn && (
+                    <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-155">
+                      {payment.dues?.title || '-'}
+                    </td>
+                  )}
                   <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
                     {new Date(payment.payment_date || payment.paid_at).toLocaleDateString()}
                   </td>
