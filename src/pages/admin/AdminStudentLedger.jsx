@@ -47,17 +47,28 @@ export default function AdminStudentLedger() {
   const isLoading = loadingStudent || loadingPayments;
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-950">
       <AdminSidebar />
-      <div className="flex-1 p-4 lg:p-8 overflow-x-hidden">
+      <div className="flex-1 min-w-0 p-4 sm:p-6 md:p-8 overflow-x-hidden w-full max-w-full">
         <div className="mb-6">
-          <Link to="/admin/students" className="inline-flex items-center text-sm font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors mb-4 uppercase tracking-wider">
-            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+          <Link
+            to="/admin/students"
+            className="inline-flex items-center text-sm font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors mb-4 uppercase tracking-wider"
+          >
+            <svg
+              className="w-4 h-4 mr-1.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              viewBox="0 0 24 24"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
             Back to Students
           </Link>
-          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Student Payment Ledger</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+            Student Payment Ledger
+          </h1>
         </div>
 
         {loadingStudent ? (
@@ -71,24 +82,39 @@ export default function AdminStudentLedger() {
             </div>
           </div>
         ) : student ? (
-          <div className="card p-6 mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <div className="card p-4 sm:p-6 mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-lg font-bold shadow-sm shadow-blue-500/20">
+              <div className="w-12 h-12 flex-shrink-0 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-lg font-bold shadow-sm shadow-blue-500/20">
                 {student.full_name?.charAt(0).toUpperCase()}
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{student.full_name}</h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold mt-1 uppercase tracking-wider">{student.email}</p>
+              <div className="min-w-0 flex-1">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white leading-tight break-words">
+                  {student.full_name}
+                </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold mt-1 uppercase tracking-wider break-all sm:break-normal">
+                  {student.email}
+                </p>
               </div>
             </div>
           </div>
         ) : null}
-        
+
         {isLoading ? (
           <div className="flex items-center space-x-2 text-gray-500 dark:text-gray-400 font-medium">
             <svg className="animate-spin h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
             </svg>
             <span>Loading ledger...</span>
           </div>
