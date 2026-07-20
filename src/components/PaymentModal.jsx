@@ -1,14 +1,30 @@
 import { useState } from 'react';
 import { supabase } from '../services/supabaseClient';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
 export default function PaymentModal({ due, onClose }) {
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
-  // Define limits
-  const maxAmount = due.amount;
-  const minAmount = 100; // Define your minimum here
+  const { user } = useAuth();
+
+  // Calculate total paid by this student for this due
+  const totalPaid = due.payments
+    ?.filter((payment) => payment.student_id === user?.id)
+    .reduce((sum, p) => sum + (p.amount_paid || 0), 0) || 0;
+
+  const remainingAmount = due.amount - totalPaid;
+  // Define limits based on remaining amount
+  // If no amount remaining, don't allow any payment
+  let maxAmount = 0;
+  let minAmount = 0;
+
+  if (remainingAmount > 0) {
+    maxAmount = remainingAmount;
+    const baseMinAmount = 100; // Define your minimum here
+    // If remaining amount is less than base minimum, allow paying the remaining amount to clear the due
+    minAmount = remainingAmount >= baseMinAmount ? baseMinAmount : remainingAmount;
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -17,14 +33,14 @@ export default function PaymentModal({ due, onClose }) {
 
     try {
       let finalOrgId = due.organization_id;
-      
+
       if (!finalOrgId) {
         const { data: fetchedDue, error: fetchError } = await supabase
           .from('dues')
           .select('organization_id')
           .eq('id', due.id)
           .single();
-          
+
         if (fetchError || !fetchedDue?.organization_id) {
           throw new Error("Could not retrieve organization info. Please refresh.");
         }
@@ -95,9 +111,9 @@ export default function PaymentModal({ due, onClose }) {
               <span>Max: ₦{maxAmount.toLocaleString()}</span>
             </div>
           </div>
-          
+
           {error && <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">{error}</div>}
-          
+
           <form onSubmit={handleSubmit}>
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">Amount (₦)</label>
