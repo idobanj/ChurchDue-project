@@ -45,45 +45,35 @@ export default function StudentJoin() {
             }
 
             // 2. Sign up the student
+            // Metadata keys MUST be snake_case — the on_auth_user_created
+            // trigger on Supabase reads them as full_name, date_of_birth,
+            // organization_id. camelCase keys cause null value errors.
             const {data: authData, error: authError} =
                 await supabase.auth.signUp({
                     email: formData.email,
                     password: formData.password,
                     options: {
                         data: {
-                            fullName: formData.fullName,
+                            full_name: formData.fullName,
                             organization_id: org.id,
                             role: 'student',
-                            dateOfBirth: formData.dateOfBirth,
+                            date_of_birth: formData.dateOfBirth || null,
                         },
                     },
                 });
 
             if (authError) throw authError;
 
-            if (authData.user) {
-                // 3. Create user profile in the public.users table
-                // Use upsert to avoid primary key conflicts if a database trigger already created the record
-                const {error: profileError} = await supabase
-                    .from('users')
-                    .upsert({
-                        id: authData.user.id,
-                        organization_id: org.id,
-                        role: 'student',
-                        full_name: formData.fullName,
-                        email: formData.email,
-                        date_of_birth: formData.dateOfBirth,
-                    });
-
-                if (profileError) throw profileError;
-
-                navigate('/student/dashboard', {
-                    state: {
-                        message:
-                            'Account created successfully! Please check your email to verify.',
-                    },
-                });
-            }
+            // The public.users row is now created automatically by the
+            // on_auth_user_created trigger (see supabase/auto_create_user_profile.sql).
+            // No client-side upsert needed — avoids the 401 RLS/GRANT error
+            // on signup, since no session exists yet at this point.
+            navigate('/student/dashboard', {
+                state: {
+                    message:
+                        'Account created successfully! Please check your email to verify.',
+                },
+            });
         } catch (err) {
             setError(err.message);
         } finally {
