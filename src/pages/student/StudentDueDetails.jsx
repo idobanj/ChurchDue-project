@@ -81,6 +81,7 @@ export default function StudentDueDetails() {
   const totalPaid = due.payments?.reduce((sum, p) => sum + (p.amount_paid || 0), 0) || 0
   const remaining = due.amount - totalPaid
   const isFullyPaid = remaining <= 0
+  const isInactive = due.status === 'inactive'
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-900">

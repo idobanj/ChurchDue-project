@@ -26,8 +26,9 @@ export default function StudentDues() {
           payments!left (amount_paid, student_id)
         `,
                 )
-                .eq('organization_id', user.organization_id)
-                .eq('status', 'active');
+                .eq('organization_id', user.organization_id);
+                // No status filter — inactive dues still appear on the
+                // student's side (read-only) so they can see the details.
 
             if (error) throw error;
             return data;
@@ -82,32 +83,44 @@ export default function StudentDues() {
                         </div>
                     ) : dues?.length === 0 ? (
                         <div className='col-span-full text-center py-12 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm'>
-                            <p className='text-gray-500 dark:text-gray-400'>No active dues</p>
+                            <p className='text-gray-500 dark:text-gray-400'>No dues yet</p>
                         </div>
                     ) : (
                         dues?.map((due) => {
                             const paid = getAmountPaid(due);
                             const remaining = due.amount - paid;
                             const status = getPaymentStatus(due);
+                            const isInactive = due.status === 'inactive';
 
                             return (
                                 <div
                                     key={due.id}
-                                    className='bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow'>
-                                    <div className='flex items-start justify-between mb-4'>
+                                    className={`bg-white dark:bg-gray-800 border rounded-xl shadow-sm p-6 transition-shadow ${
+                                        isInactive
+                                            ? 'border-gray-200 dark:border-gray-700 opacity-75'
+                                            : 'border-gray-200 dark:border-gray-700 hover:shadow-md'
+                                    }`}>
+                                    <div className='flex items-start justify-between mb-4 gap-2'>
                                         <h3 className='font-semibold text-gray-900 dark:text-gray-100 text-lg'>
                                             {due.title}
                                         </h3>
-                                        <span
-                                            className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                                                status === 'completed'
-                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
-                                                    : status === 'partial'
-                                                      ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300'
-                                                      : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-                                            }`}>
-                                            {status}
-                                        </span>
+                                        <div className='flex flex-col items-end gap-1 shrink-0'>
+                                            <span
+                                                className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
+                                                    status === 'completed'
+                                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
+                                                        : status === 'partial'
+                                                          ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300'
+                                                          : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                                                }`}>
+                                                {status}
+                                            </span>
+                                            {isInactive && (
+                                                <span className='inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300'>
+                                                    Inactive
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {due.description && (
@@ -135,12 +148,22 @@ export default function StudentDues() {
                                             className='flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'>
                                             Details
                                         </button>
-                                        {status !== 'completed' && (
+                                        {isInactive ? (
                                             <button
-                                                onClick={() => handlePay(due)}
-                                                className='flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700'>
-                                                Pay
+                                                type='button'
+                                                disabled
+                                                title='This due is no longer accepting payments.'
+                                                className='flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed'>
+                                                Closed
                                             </button>
+                                        ) : (
+                                            status !== 'completed' && (
+                                                <button
+                                                    onClick={() => handlePay(due)}
+                                                    className='flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700'>
+                                                    Pay
+                                                </button>
+                                            )
                                         )}
                                     </div>
                                 </div>
