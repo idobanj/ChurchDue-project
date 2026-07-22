@@ -19,7 +19,7 @@ export function AuthProvider({ children }) {
     // Add this function inside your AuthProvider component
     const resetPassword = async (email) => {
         return await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/update-password`, // Change this to your actual route
+            redirectTo: `${window.location.origin}/reset-password`, // Match the actual route in App.jsx
         });
     };
 
