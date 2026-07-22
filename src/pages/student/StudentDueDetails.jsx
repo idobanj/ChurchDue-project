@@ -100,8 +100,32 @@ export default function StudentDueDetails() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Due Details */}
           <div className="lg:col-span-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{due.title}</h1>
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{due.title}</h1>
+              {isInactive && (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 shrink-0">
+                  Inactive
+                </span>
+              )}
+            </div>
             <p className="text-gray-600 dark:text-gray-400 mb-6">{due.description}</p>
+
+            {isInactive && (
+              <div className="mb-6 flex items-start gap-3 p-4 rounded-lg bg-gray-100 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600">
+                <span className="text-xl leading-none" role="img" aria-label="locked">
+                  🔒
+                </span>
+                <div className="text-sm">
+                  <p className="font-semibold text-gray-900 dark:text-white">
+                    Payment is closed for this due.
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-400 mt-0.5">
+                    Your admin has disabled payments. You can still review
+                    the details and your payment history below.
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
               <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
@@ -135,14 +159,25 @@ export default function StudentDueDetails() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex space-x-3">
-              {!isFullyPaid && (
+            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+              {isInactive ? (
                 <button
-                  onClick={() => setShowPaymentModal(true)}
-                  className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors"
+                  type="button"
+                  disabled
+                  title="This due is no longer accepting payments."
+                  className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-6 py-3 rounded-lg font-medium cursor-not-allowed"
                 >
-                  Make Payment
+                  Payment Closed
                 </button>
+              ) : (
+                !isFullyPaid && (
+                  <button
+                    onClick={() => setShowPaymentModal(true)}
+                    className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors"
+                  >
+                    Make Payment
+                  </button>
+                )
               )}
               {totalPaid > 0 && (
                 <button
