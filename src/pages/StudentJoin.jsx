@@ -153,7 +153,7 @@ export default function StudentJoin() {
                         </div>
                         <div>
                             <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
-                                Date of Birth
+                                Date of Birth <span className='text-gray-400 dark:text-gray-500 font-normal'>(optional)</span>
                             </label>
                             <input
                                 type='date'

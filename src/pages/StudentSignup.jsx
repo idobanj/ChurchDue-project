@@ -148,13 +148,12 @@ export default function StudentSignup() {
 
             <div>
               <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Date of Birth
+                Date of Birth <span className="text-gray-400 dark:text-gray-500 font-normal">(optional)</span>
               </label>
               <input
                 id="dateOfBirth"
                 name="dateOfBirth"
                 type="date"
-                required
                 value={formData.dateOfBirth}
                 onChange={handleChange}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
