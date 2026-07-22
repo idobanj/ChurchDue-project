@@ -1,17 +1,25 @@
 /** @format */
 
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import BackButton from '../components/BackButton';
 
 export default function StudentLogin() {
     const navigate = useNavigate();
-    const {signIn} = useAuth();
+    const {user, loading: authLoading, signIn} = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (user && !authLoading) {
+            if (user.role?.toLowerCase() === 'student') {
+                navigate('/student/dashboard');
+            }
+        }
+    }, [user, authLoading, navigate]);
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -29,10 +37,6 @@ export default function StudentLogin() {
             }
             setLoading(false);
             return;
-        }
-
-        if (data?.user) {
-            navigate('/student/dashboard');
         }
 
         setLoading(false);
