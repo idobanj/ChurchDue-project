@@ -5,6 +5,7 @@ import {Link, useNavigate} from 'react-router-dom';
 import {useAuth} from '../contexts/AuthContext';
 import {supabase} from '../services/supabaseClient';
 import BackButton from '../components/BackButton';
+import SignupSuccessModal from '../components/SignupSuccessModal';
 
 export default function AdminSignup() {
     const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function AdminSignup() {
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
 
     function handleChange(e) {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -50,10 +52,13 @@ export default function AdminSignup() {
             if (orgError) throw orgError;
 
             // 2. Register Auth User
+            // emailRedirectTo points to /auth/confirmed which routes the
+            // admin to /admin/login after email verification.
             const { error: authError } = await supabase.auth.signUp({
                 email: formData.email,
                 password: formData.password,
                 options: {
+                    emailRedirectTo: `${window.location.origin}/auth/confirmed`,
                     data: {
                         full_name: formData.fullName,
                         role: 'admin',
@@ -68,9 +73,8 @@ export default function AdminSignup() {
                 throw authError;
             }
 
-            // 3. SUCCESS: Tell the user to verify their email
-            alert("Account created! Please check your email inbox to verify your account before logging in.");
-            navigate('/admin/login');
+            // 3. SUCCESS: show modal prompting the user to verify their email.
+            setShowSuccess(true);
 
         } catch (err) {
             setError(err.message || 'An error occurred during account setup.');
@@ -228,6 +232,14 @@ export default function AdminSignup() {
                     </div>
                 </div>
             </div>
+
+            {showSuccess && (
+                <SignupSuccessModal
+                    email={formData.email}
+                    loginPath='/admin/login'
+                    onClose={() => setShowSuccess(false)}
+                />
+            )}
         </div>
     );
 }

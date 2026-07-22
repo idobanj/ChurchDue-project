@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../services/supabaseClient'
 import BackButton from '../components/BackButton'
+import SignupSuccessModal from '../components/SignupSuccessModal'
 
 export default function StudentSignup() {
   const { slug } = useParams();
@@ -18,6 +19,7 @@ export default function StudentSignup() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetchingOrg, setFetchingOrg] = useState(true);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
       async function fetchOrganization() {
@@ -61,10 +63,13 @@ export default function StudentSignup() {
       try {
           // Register Auth User
           // We pass the organization_id in the metadata
+          // emailRedirectTo points to /auth/confirmed which routes the
+          // user to the correct login page based on their role.
           const { error: authError } = await supabase.auth.signUp({
               email: formData.email,
               password: formData.password,
               options: {
+                  emailRedirectTo: `${window.location.origin}/auth/confirmed`,
                   data: {
                       full_name: formData.fullName,
                       date_of_birth: formData.dateOfBirth,
@@ -76,10 +81,9 @@ export default function StudentSignup() {
 
           if (authError) throw authError;
 
-          // SUCCESS: Inform user to verify
-          alert("Account created! Please check your email to verify your account before you can log in.");
-          navigate('/student/login');
-          
+          // SUCCESS: Show modal prompting the user to verify their email.
+          setShowSuccess(true);
+
       } catch (err) {
           setError(err.message);
       } finally {
@@ -222,6 +226,14 @@ export default function StudentSignup() {
           </div>
         </div>
       </div>
+
+      {showSuccess && (
+        <SignupSuccessModal
+          email={formData.email}
+          loginPath='/student/login'
+          onClose={() => setShowSuccess(false)}
+        />
+      )}
     </div>
   )
 }

@@ -5,13 +5,15 @@ import {useParams, useNavigate} from 'react-router-dom';
 import {supabase} from '../services/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import ThemeToggle from '../components/ThemeToggle';
-import BackButton from '../components/BackButton';  
+import BackButton from '../components/BackButton';
+import SignupSuccessModal from '../components/SignupSuccessModal';
 
 export default function StudentJoin() {
     const {slug} = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [showSuccess, setShowSuccess] = useState(false);
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
@@ -48,11 +50,14 @@ export default function StudentJoin() {
             // Metadata keys MUST be snake_case — the on_auth_user_created
             // trigger on Supabase reads them as full_name, date_of_birth,
             // organization_id. camelCase keys cause null value errors.
+            // emailRedirectTo points to /auth/confirmed which routes the
+            // user to the correct login page based on their role.
             const {data: authData, error: authError} =
                 await supabase.auth.signUp({
                     email: formData.email,
                     password: formData.password,
                     options: {
+                        emailRedirectTo: `${window.location.origin}/auth/confirmed`,
                         data: {
                             full_name: formData.fullName,
                             organization_id: org.id,
@@ -68,12 +73,7 @@ export default function StudentJoin() {
             // on_auth_user_created trigger (see supabase/auto_create_user_profile.sql).
             // No client-side upsert needed — avoids the 401 RLS/GRANT error
             // on signup, since no session exists yet at this point.
-            navigate('/student/dashboard', {
-                state: {
-                    message:
-                        'Account created successfully! Please check your email to verify.',
-                },
-            });
+            setShowSuccess(true);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -213,6 +213,14 @@ export default function StudentJoin() {
                     </form>
                 </div>
             </div>
+
+            {showSuccess && (
+                <SignupSuccessModal
+                    email={formData.email}
+                    loginPath='/student/login'
+                    onClose={() => setShowSuccess(false)}
+                />
+            )}
         </div>
     );
 }

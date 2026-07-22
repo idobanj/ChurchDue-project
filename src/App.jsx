@@ -11,6 +11,7 @@ const StudentLogin = lazy(() => import('./pages/StudentLogin'));
 const StudentSignup = lazy(() => import('./pages/StudentSignup'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const EmailConfirmed = lazy(() => import('./pages/EmailConfirmed'));
 const StudentJoin = lazy(() => import('./pages/StudentJoin'));
 
 // Admin Pages
@@ -161,6 +162,7 @@ function AppRoutes() {
 
                 <Route path='/forgot-password' element={<ForgotPassword />} />
                 <Route path='/reset-password' element={<ResetPassword />} />
+                <Route path='/auth/confirmed' element={<EmailConfirmed />} />
                 <Route path='*' element={<TestPage />} />
             </Routes>
         </Suspense>
