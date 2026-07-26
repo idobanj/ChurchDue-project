@@ -2,13 +2,16 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../services/supabaseClient'
 import AdminSidebar from '../../components/AdminSidebar'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function PaymentsPage() {
+  const { user } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
   const { data: payments, isLoading } = useQuery({
-    queryKey: ['payments'],
+    queryKey: ['payments', user?.organization_id],
+    enabled: Boolean(user?.organization_id),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('payments')
@@ -24,6 +27,7 @@ export default function PaymentsPage() {
           users (full_name, email),
           dues (title)
         `)
+        .eq('organization_id', user.organization_id)
         .order('paid_at', { ascending: false })
 
       if (error) throw error
@@ -40,6 +44,12 @@ export default function PaymentsPage() {
     return matchesSearch && matchesStatus
   })
 
+  const csvCell = (value = '') => {
+    const stringValue = String(value ?? '')
+    const formulaSafeValue = /^[=+\-@]/.test(stringValue) ? `'${stringValue}` : stringValue
+    return `"${formulaSafeValue.replaceAll('"', '""')}"`
+  }
+
   function exportToCSV() {
     const headers = ['Student Name', 'Student Email', 'Due Title', 'Amount', 'Status', 'Payment Date']
     const rows = filteredPayments?.map((payment) => [
@@ -51,7 +61,9 @@ export default function PaymentsPage() {
       new Date(payment.paid_at).toISOString(),
     ])
 
-    const csvContent = [headers, ...rows].map((row) => row.join(',')).join('\n')
+    const csvContent = [headers, ...(rows || [])]
+      .map((row) => row.map(csvCell).join(','))
+      .join('\n')
     const blob = new Blob([csvContent], { type: 'text/csv' })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')

@@ -32,21 +32,6 @@ export default function PaymentModal({ due, onClose }) {
     setLoading(true);
 
     try {
-      let finalOrgId = due.organization_id;
-
-      if (!finalOrgId) {
-        const { data: fetchedDue, error: fetchError } = await supabase
-          .from('dues')
-          .select('organization_id')
-          .eq('id', due.id)
-          .single();
-
-        if (fetchError || !fetchedDue?.organization_id) {
-          throw new Error("Could not retrieve organization info. Please refresh.");
-        }
-        finalOrgId = fetchedDue.organization_id;
-      }
-
       const paymentAmount = parseFloat(amount);
       // Validate against Min and Max
       if (isNaN(paymentAmount) || paymentAmount < minAmount || paymentAmount > maxAmount) {
@@ -60,12 +45,24 @@ export default function PaymentModal({ due, onClose }) {
           body: {
             reference: response.reference,
             due_id: due.id,
-            expectedAmount: Math.round(paymentAmount * 100),
-            organization_id: finalOrgId,
           },
         })
-        .then(({ error: funcError }) => {
-          if (funcError) throw new Error(funcError.message);
+        .then(async ({ error: funcError }) => {
+          if (funcError) {
+            let message = funcError.message;
+            const response = funcError.context;
+
+            if (response?.json) {
+              try {
+                const body = await response.json();
+                message = body?.error || message;
+              } catch {
+                // Keep the original Supabase function error message.
+              }
+            }
+
+            throw new Error(message);
+          }
           alert('Payment Successful!');
           onClose();
         })

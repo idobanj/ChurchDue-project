@@ -26,6 +26,10 @@ export default function RefundModal({ due, totalPaid, onClose }) {
       onClose()
       alert('Refund request submitted successfully!')
     },
+    onError: (err) => {
+      setError(err.message || 'Unable to submit refund request')
+      setLoading(false)
+    },
   })
 
   function handleSubmit(e) {
@@ -49,6 +53,11 @@ export default function RefundModal({ due, totalPaid, onClose }) {
       return
     }
 
+    if (reason.trim().length > 500) {
+      setError('Reason must be 500 characters or less')
+      return
+    }
+
     setLoading(true)
 
     if (!user?.id || !user?.organization_id) {
@@ -57,8 +66,18 @@ export default function RefundModal({ due, totalPaid, onClose }) {
       return
     }
 
+    const payment = due.payments?.find(
+      (item) => item.student_id === user.id && item.status === 'completed'
+    )
+
+    if (!payment?.id) {
+      setError('No completed payment found for this due')
+      setLoading(false)
+      return
+    }
+
     createRefund.mutate({
-      payment_id: due.payments?.[0]?.id, // Get appropriate payment ID
+      payment_id: payment.id,
       student_id: user.id,
       organization_id: user.organization_id,
       amount: refundAmount,

@@ -3,18 +3,23 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../services/supabaseClient';
 import AdminSidebar from '../../components/AdminSidebar';
 import PaymentHistoryTable from '../../components/student/PaymentHistoryTable';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function AdminStudentLedger() {
+  const { user } = useAuth();
   const { id } = useParams(); // The student's ID from the URL
 
   // Fetch student details
   const { data: student, isLoading: loadingStudent } = useQuery({
-    queryKey: ['adminStudentProfile', id],
+    queryKey: ['adminStudentProfile', id, user?.organization_id],
+    enabled: Boolean(id && user?.organization_id),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('users')
         .select('full_name, email')
         .eq('id', id)
+        .eq('organization_id', user.organization_id)
+        .eq('role', 'student')
         .single();
 
       if (error) throw error;
@@ -24,7 +29,8 @@ export default function AdminStudentLedger() {
 
   // Fetch payments list
   const { data: payments, isLoading: loadingPayments } = useQuery({
-    queryKey: ['adminStudentLedger', id],
+    queryKey: ['adminStudentLedger', id, user?.organization_id],
+    enabled: Boolean(id && user?.organization_id),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('payments')
@@ -37,6 +43,7 @@ export default function AdminStudentLedger() {
           dues (title)
         `)
         .eq('student_id', id)
+        .eq('organization_id', user.organization_id)
         .order('paid_at', { ascending: false });
 
       if (error) throw error;

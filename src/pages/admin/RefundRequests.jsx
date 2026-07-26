@@ -2,14 +2,17 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../services/supabaseClient'
 import AdminSidebar from '../../components/AdminSidebar'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function RefundRequests() {
+  const { user } = useAuth()
   const queryClient = useQueryClient()
   const [selectedRequest, setSelectedRequest] = useState(null)
   const [showModal, setShowModal] = useState(false)
 
   const { data: refunds, isLoading } = useQuery({
-    queryKey: ['refunds'],
+    queryKey: ['refunds', user?.organization_id],
+    enabled: Boolean(user?.organization_id),
     queryFn: async () => {
       const { data, error } = await supabase
         .from('refunds')
@@ -26,6 +29,7 @@ export default function RefundRequests() {
           payments (due_id),
           dues (title)
         `)
+        .eq('organization_id', user.organization_id)
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -35,17 +39,24 @@ export default function RefundRequests() {
 
   const updateRefund = useMutation({
     mutationFn: async ({ id, status }) => {
+      if (!['approved', 'rejected'].includes(status)) {
+        throw new Error('Invalid refund status')
+      }
+
       const { data, error } = await supabase
         .from('refunds')
         .update({ status })
         .eq('id', id)
+        .eq('organization_id', user.organization_id)
+        .eq('status', 'pending')
         .select()
 
       if (error) throw error
+      if (!data?.length) throw new Error('Refund request not found or already processed')
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['refunds'])
+      queryClient.invalidateQueries(['refunds', user?.organization_id])
       setShowModal(false)
       setSelectedRequest(null)
     },

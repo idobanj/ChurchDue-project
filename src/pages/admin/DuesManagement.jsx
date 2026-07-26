@@ -7,7 +7,6 @@ import { useAuth } from '../../contexts/AuthContext'
 
 export default function DuesManagement() {
   const { user } = useAuth()
-  console.log('DuesManagement - Current user:', user) // Debug log
   const queryClient = useQueryClient()
   const [showModal, setShowModal] = useState(false)
   const [editingDue, setEditingDue] = useState(null)
@@ -35,14 +34,12 @@ export default function DuesManagement() {
 
   const createDue = useMutation({
     mutationFn: async (dueData) => {
-      console.log('Attempting to create due with data:', dueData)
       const { data, error } = await supabase
         .from('dues')
         .insert(dueData)
         .select()
 
       if (error) {
-        console.error('Supabase Insert Error:', error)
         throw error
       }
       return data
@@ -54,24 +51,23 @@ export default function DuesManagement() {
       resetForm()
     },
     onError: (error) => {
-      console.error('Mutation Error:', error)
       alert(`Failed to create due: ${error.message}`)
     }
   })
 
   const updateDue = useMutation({
     mutationFn: async ({ id, ...dueData }) => {
-      console.log('Attempting to update due with id:', id, 'and data:', dueData)
       const { data, error } = await supabase
         .from('dues')
         .update(dueData)
         .eq('id', id)
+        .eq('organization_id', user.organization_id)
         .select()
 
       if (error) {
-        console.error('Supabase Update Error:', error)
         throw error
       }
+      if (!data?.length) throw new Error('Due not found or not in your organization')
       return data
     },
     onSuccess: () => {
@@ -82,7 +78,6 @@ export default function DuesManagement() {
       resetForm()
     },
     onError: (error) => {
-      console.error('Update Mutation Error:', error)
       alert(`Failed to update due: ${error.message}`)
     },
   })
@@ -93,6 +88,7 @@ export default function DuesManagement() {
         .from('dues')
         .delete()
         .eq('id', id)
+        .eq('organization_id', user.organization_id)
 
       if (error) throw error
     },
@@ -125,9 +121,6 @@ export default function DuesManagement() {
   function handleSubmit(e) {
     e.preventDefault()
 
-    console.log('Form submit - user:', user) 
-    console.log('Form submit - formData:', formData) 
-
     if (!user) {
       alert('Error: No user found. Please log in again.')
       return
@@ -135,7 +128,6 @@ export default function DuesManagement() {
 
     if (!user?.organization_id) {
       alert('Error: No organization associated with your account. Please try logging out and in again, or check your user profile in the database.')
-      console.log('User object missing organization_id:', user) 
       return
     }
 

@@ -20,7 +20,6 @@ const AdminDueDetails = lazy(() => import('./pages/admin/AdminDueDetails'));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
 const DuesManagement = lazy(() => import('./pages/admin/DuesManagement'));
 const PaymentsPage = lazy(() => import('./pages/admin/PaymentsPage'));
-const RefundRequests = lazy(() => import('./pages/admin/RefundRequests'));
 const StudentsPage = lazy(() => import('./pages/admin/StudentsPage'));
 const AdminStudentLedger = lazy(() => import('./pages/admin/AdminStudentLedger'));
 
@@ -95,14 +94,6 @@ function AppRoutes() {
                     element={
                         <ProtectedRoute expectedRole='admin'>
                             <StudentsPage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path='/admin/refunds'
-                    element={
-                        <ProtectedRoute expectedRole='admin'>
-                            <RefundRequests />
                         </ProtectedRoute>
                     }
                 />

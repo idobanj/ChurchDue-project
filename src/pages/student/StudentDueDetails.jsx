@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../services/supabaseClient'
 import StudentSidebar from '../../components/StudentSidebar'
 import PaymentModal from '../../components/PaymentModal'
-import RefundModal from '../../components/RefundModal'
 import PaymentHistoryTable from '../../components/student/PaymentHistoryTable'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -13,7 +12,6 @@ export default function StudentDueDetails() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [showPaymentModal, setShowPaymentModal] = useState(false)
-  const [showRefundModal, setShowRefundModal] = useState(false)
 
   const { data: due, isLoading } = useQuery({
     queryKey: ['due', id, user?.id, user?.organization_id],
@@ -179,14 +177,6 @@ export default function StudentDueDetails() {
                   </button>
                 )
               )}
-              {totalPaid > 0 && (
-                <button
-                  onClick={() => setShowRefundModal(true)}
-                  className="flex-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  Request Refund
-                </button>
-              )}
             </div>
           </div>
 
@@ -199,13 +189,6 @@ export default function StudentDueDetails() {
           <PaymentModal
             due={due}
             onClose={() => setShowPaymentModal(false)}
-          />
-        )}
-        {showRefundModal && (
-          <RefundModal
-            due={due}
-            totalPaid={totalPaid}
-            onClose={() => setShowRefundModal(false)}
           />
         )}
       </div>

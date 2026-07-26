@@ -30,6 +30,7 @@ export default function AdminDashboard() {
           users (full_name),
           dues (title)
         `)
+        .eq('organization_id', user.organization_id)
         .order('paid_at', { ascending: false })
         .limit(5)
 
@@ -58,6 +59,7 @@ export default function AdminDashboard() {
       const { data: paymentsData } = await supabase
         .from('payments')
         .select('amount_paid')
+        .eq('organization_id', user.organization_id)
 
       const totalCollected = paymentsData?.reduce((sum, p) => sum + (p.amount_paid || 0), 0) || 0
 
