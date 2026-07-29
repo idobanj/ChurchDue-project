@@ -1,197 +1,225 @@
-import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '../../services/supabaseClient'
-import StudentSidebar from '../../components/StudentSidebar'
-import PaymentModal from '../../components/PaymentModal'
-import PaymentHistoryTable from '../../components/student/PaymentHistoryTable'
-import { useAuth } from '../../contexts/AuthContext'
+/** @format */
+
+import {useState} from 'react';
+import {useParams, useNavigate} from 'react-router-dom';
+import {useQuery} from '@tanstack/react-query';
+import {supabase} from '../../services/supabaseClient';
+import StudentSidebar from '../../components/StudentSidebar';
+import PaymentModal from '../../components/PaymentModal';
+import PaymentHistoryTable from '../../components/student/PaymentHistoryTable';
+import {useAuth} from '../../contexts/AuthContext';
 
 export default function StudentDueDetails() {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  const { user } = useAuth()
-  const [showPaymentModal, setShowPaymentModal] = useState(false)
+    const {id} = useParams();
+    const navigate = useNavigate();
+    const {user} = useAuth();
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  const { data: due, isLoading } = useQuery({
-    queryKey: ['due', id, user?.id, user?.organization_id],
-    enabled: Boolean(id && user?.id && user?.organization_id),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('dues')
-        .select(`
-          id,
-          title,
-          description,
-          amount,
-          status,
-          created_at,
-          payments (
-            id,
-            student_id,
-            amount_paid,
-            paid_at,
-            status
-          )
-        `)
-        .eq('id', id)
-        .eq('organization_id', user.organization_id)
-        .single()
+    const {data: due, isLoading} = useQuery({
+        queryKey: ['due', id, user?.id, user?.organization_id],
+        enabled: Boolean(id && user?.id && user?.organization_id),
+        queryFn: async () => {
+            const {data, error} = await supabase
+                .from('dues')
+                .select('*, payments(*)')
+                .eq('id', id)
+                .single();
 
-      if (error) throw error
-      return {
-        ...data,
-        payments: data.payments?.filter((payment) => payment.student_id === user.id) || [],
-      }
-    },
-  })
+            if (error) throw error;
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-900">
-        <StudentSidebar />
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-        </div>
-      </div>
-    )
-  }
+            return {
+                ...data,
+                payments:
+                    data?.payments?.filter(
+                        (payment) => payment.student_id === user.id,
+                    ) || [],
+            };
+        },
+    });
 
-  if (!due) {
-    return (
-      <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-900">
-        <StudentSidebar />
-        <div className="flex-1 p-4 md:p-8">
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Due not found</h2>
-            <button
-              onClick={() => navigate('/student/dues')}
-              className="mt-4 text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
-            >
-              Back to Dues
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  const totalPaid = due.payments?.reduce((sum, p) => sum + (p.amount_paid || 0), 0) || 0
-  const remaining = due.amount - totalPaid
-  const isFullyPaid = remaining <= 0
-  const isInactive = due.status === 'inactive'
-
-  return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-900">
-      <StudentSidebar />
-      <div className="flex-1 p-4 md:p-8">
-        <button
-          onClick={() => navigate('/student/dues')}
-          className="flex items-center text-gray-600 hover:text-gray-900 mb-6 dark:text-gray-400 dark:hover:text-gray-200"
-        >
-          <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Back to Dues
-        </button>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Due Details */}
-          <div className="lg:col-span-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-6">
-            <div className="flex items-start justify-between gap-3 mb-2">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{due.title}</h1>
-              {isInactive && (
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 shrink-0">
-                  Inactive
-                </span>
-              )}
-            </div>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">{due.description}</p>
-
-            {isInactive && (
-              <div className="mb-6 flex items-start gap-3 p-4 rounded-lg bg-gray-100 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600">
-                <span className="text-xl leading-none" role="img" aria-label="locked">
-                  🔒
-                </span>
-                <div className="text-sm">
-                  <p className="font-semibold text-gray-900 dark:text-white">
-                    Payment is closed for this due.
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-400 mt-0.5">
-                    Your admin has disabled payments. You can still review
-                    the details and your payment history below.
-                  </p>
+    if (isLoading) {
+        return (
+            <div className='flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-900'>
+                <StudentSidebar />
+                <div className='flex-1 flex items-center justify-center p-4'>
+                    <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600'></div>
                 </div>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Amount</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">₦{due.amount.toLocaleString()}</p>
-              </div>
-              <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Paid</p>
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400">₦{totalPaid.toLocaleString()}</p>
-              </div>
-              <div className="bg-orange-50 dark:bg-orange-900/30 rounded-lg p-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Remaining</p>
-                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">₦{remaining.toLocaleString()}</p>
-              </div>
             </div>
+        );
+    }
 
-            {/* Progress Bar */}
-            <div className="mb-6">
-              <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mb-2">
-                <span>Payment Progress</span>
-                <span>{Math.round((totalPaid / due.amount) * 100)}%</span>
-              </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                <div
-                  className={`h-3 rounded-full transition-all ${
-                    isFullyPaid ? 'bg-green-600 dark:bg-green-500' : 'bg-primary-600 dark:bg-primary-500'
-                  }`}
-                  style={{ width: `${(totalPaid / due.amount) * 100}%` }}
-                />
-              </div>
+    if (!due) {
+        return (
+            <div className='flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-900'>
+                <StudentSidebar />
+                <div className='flex-1 p-4 md:p-8'>
+                    <div className='text-center py-12'>
+                        <h2 className='text-2xl font-bold text-gray-900 dark:text-white'>
+                            Due not found
+                        </h2>
+                        <button
+                            onClick={() => navigate('/student/dues')}
+                            className='mt-4 text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300'>
+                            Back to Dues
+                        </button>
+                    </div>
+                </div>
             </div>
+        );
+    }
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
-              {isInactive ? (
+    const totalPaid =
+        due.payments?.reduce((sum, p) => sum + (p.amount_paid || 0), 0) || 0;
+    const remaining = due.amount - totalPaid;
+    const isFullyPaid = remaining <= 0;
+    const isInactive = due.status === 'inactive';
+
+    return (
+        <div className='flex flex-col md:flex-row min-h-screen bg-gray-50 dark:bg-gray-900'>
+            <StudentSidebar />
+            <div className='flex-1 p-4 md:p-8'>
                 <button
-                  type="button"
-                  disabled
-                  title="This due is no longer accepting payments."
-                  className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-6 py-3 rounded-lg font-medium cursor-not-allowed"
-                >
-                  Payment Closed
+                    onClick={() => navigate('/student/dues')}
+                    className='flex items-center text-gray-600 hover:text-gray-900 mb-6 dark:text-gray-400 dark:hover:text-gray-200'>
+                    <svg
+                        className='w-5 h-5 mr-1'
+                        fill='none'
+                        stroke='currentColor'
+                        viewBox='0 0 24 24'>
+                        <path
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            strokeWidth={2}
+                            d='M15 19l-7-7 7-7'
+                        />
+                    </svg>
+                    Back to Dues
                 </button>
-              ) : (
-                !isFullyPaid && (
-                  <button
-                    onClick={() => setShowPaymentModal(true)}
-                    className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors"
-                  >
-                    Make Payment
-                  </button>
-                )
-              )}
+
+                <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+                    {/* Due Details */}
+                    <div className='lg:col-span-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm p-6'>
+                        <div className='flex items-start justify-between gap-3 mb-2'>
+                            <h1 className='text-2xl font-bold text-gray-900 dark:text-white'>
+                                {due.title}
+                            </h1>
+                            {isInactive && (
+                                <span className='inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 shrink-0'>
+                                    Inactive
+                                </span>
+                            )}
+                        </div>
+                        <p className='text-gray-600 dark:text-gray-400 mb-6'>
+                            {due.description}
+                        </p>
+
+                        {isInactive && (
+                            <div className='mb-6 flex items-start gap-3 p-4 rounded-lg bg-gray-100 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600'>
+                                <span
+                                    className='text-xl leading-none'
+                                    role='img'
+                                    aria-label='locked'>
+                                    🔒
+                                </span>
+                                <div className='text-sm'>
+                                    <p className='font-semibold text-gray-900 dark:text-white'>
+                                        Payment is closed for this due.
+                                    </p>
+                                    <p className='text-gray-600 dark:text-gray-400 mt-0.5'>
+                                        Your admin has disabled payments. You
+                                        can still review the details and your
+                                        payment history below.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6'>
+                            <div className='bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4'>
+                                <p className='text-sm text-gray-500 dark:text-gray-400'>
+                                    Total Amount
+                                </p>
+                                <p className='text-2xl font-bold text-gray-900 dark:text-white'>
+                                    ₦{due.amount.toLocaleString()}
+                                </p>
+                            </div>
+                            <div className='bg-green-50 dark:bg-green-900/30 rounded-lg p-4'>
+                                <p className='text-sm text-gray-500 dark:text-gray-400'>
+                                    Total Paid
+                                </p>
+                                <p className='text-2xl font-bold text-green-600 dark:text-green-400'>
+                                    ₦{totalPaid.toLocaleString()}
+                                </p>
+                            </div>
+                            <div className='bg-orange-50 dark:bg-orange-900/30 rounded-lg p-4'>
+                                <p className='text-sm text-gray-500 dark:text-gray-400'>
+                                    Remaining
+                                </p>
+                                <p className='text-2xl font-bold text-orange-600 dark:text-orange-400'>
+                                    ₦{remaining.toLocaleString()}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className='mb-6'>
+                            <div className='flex justify-between text-sm text-gray-500 dark:text-gray-400 mb-2'>
+                                <span>Payment Progress</span>
+                                <span>
+                                    {Math.round((totalPaid / due.amount) * 100)}
+                                    %
+                                </span>
+                            </div>
+                            <div className='w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3'>
+                                <div
+                                    className={`h-3 rounded-full transition-all ${
+                                        isFullyPaid
+                                            ? 'bg-green-600 dark:bg-green-500'
+                                            : 'bg-primary-600 dark:bg-primary-500'
+                                    }`}
+                                    style={{
+                                        width: `${(totalPaid / due.amount) * 100}%`,
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className='flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3'>
+                            {isInactive ? (
+                                <button
+                                    type='button'
+                                    disabled
+                                    title='This due is no longer accepting payments.'
+                                    className='flex-1 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-6 py-3 rounded-lg font-medium cursor-not-allowed'>
+                                    Payment Closed
+                                </button>
+                            ) : (
+                                !isFullyPaid && (
+                                    <button
+                                        onClick={() =>
+                                            setShowPaymentModal(true)
+                                        }
+                                        className='flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors'>
+                                        Make Payment
+                                    </button>
+                                )
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Payment History */}
+                    <PaymentHistoryTable payments={due.payments} />
+                </div>
+
+                {/* Modals */}
+                {showPaymentModal && (
+                    <PaymentModal
+                        due={due}
+                        onClose={() => setShowPaymentModal(false)}
+                    />
+                )}
             </div>
-          </div>
-
-          {/* Payment History */}
-          <PaymentHistoryTable payments={due.payments} />
         </div>
-
-        {/* Modals */}
-        {showPaymentModal && (
-          <PaymentModal
-            due={due}
-            onClose={() => setShowPaymentModal(false)}
-          />
-        )}
-      </div>
-    </div>
-  )
+    );
 }
