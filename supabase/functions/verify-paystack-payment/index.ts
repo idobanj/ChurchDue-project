@@ -148,7 +148,12 @@ serve(async (req) => {
     if (currency !== 'NGN' || typeof amount !== 'number' || amount <= 0) {
       return json({ error: 'Invalid payment details' }, 400)
     }
-    if (metadataDueId !== due_id || metadataStudentId !== authUser.id) {
+    if (
+      typeof metadataDueId !== 'string' ||
+      typeof metadataStudentId !== 'string' ||
+      metadataDueId.toLowerCase() !== due_id.toLowerCase() ||
+      metadataStudentId.toLowerCase() !== authUser.id.toLowerCase()
+    ) {
       return json({ error: 'Payment metadata mismatch' }, 403)
     }
 
@@ -199,9 +204,9 @@ serve(async (req) => {
 
     const amountInNaira = amount / 100
     const totalPaid = previousPayments?.reduce((sum, payment) => sum + (payment.amount_paid || 0), 0) || 0
-    const remainingAmount = dueData.amount - totalPaid
+    const remainingAmountInKobo = Math.round((dueData.amount - totalPaid) * 100)
 
-    if (amountInNaira <= 0 || amountInNaira > remainingAmount) {
+    if (amount <= 0 || amount > remainingAmountInKobo) {
       return json({ error: 'Payment amount exceeds outstanding balance' }, 400)
     }
 
@@ -214,7 +219,7 @@ serve(async (req) => {
         amount_paid: amountInNaira,
         paystack_reference: reference,
         status: 'completed',
-        paid_at: new Date().toISOString(),
+        paid_at: paystackData.data.paid_at || new Date().toISOString(),
       })
       .select('id, amount_paid, paystack_reference, status, paid_at, created_at')
       .single()
