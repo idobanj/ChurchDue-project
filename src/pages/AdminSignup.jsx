@@ -1,14 +1,12 @@
 /** @format */
 
 import {useState} from 'react';
-import {Link, useNavigate} from 'react-router-dom';
-import {useAuth} from '../contexts/AuthContext';
+import {Link} from 'react-router-dom';
 import {supabase} from '../services/supabaseClient';
 import BackButton from '../components/BackButton';
 import SignupSuccessModal from '../components/SignupSuccessModal';
 
 export default function AdminSignup() {
-    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         churchName: '',
         fullName: '',
@@ -41,39 +39,35 @@ export default function AdminSignup() {
         setLoading(true);
 
         try {
-            // 1. Create Organization
-            const slug = formData.churchName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
-            const { data: orgData, error: orgError } = await supabase
-                .from('organizations')
-                .insert([{ name: formData.churchName, slug, paystack_connected: false }])
-                .select()
-                .single();
+            const {error: functionError} = await supabase.functions.invoke(
+                'create-admin-account',
+                {
+                    body: {
+                        churchName: formData.churchName,
+                        fullName: formData.fullName,
+                        email: formData.email,
+                        password: formData.password,
+                        emailRedirectTo: `${window.location.origin}/auth/confirmed`,
+                    },
+                },
+            );
 
-            if (orgError) throw orgError;
+            if (functionError) {
+                let message = functionError.message;
+                const response = functionError.context;
 
-            // 2. Register Auth User
-            // emailRedirectTo points to /auth/confirmed which routes the
-            // admin to /admin/login after email verification.
-            const { error: authError } = await supabase.auth.signUp({
-                email: formData.email,
-                password: formData.password,
-                options: {
-                    emailRedirectTo: `${window.location.origin}/auth/confirmed`,
-                    data: {
-                        full_name: formData.fullName,
-                        role: 'admin',
-                        organization_id: orgData.id
+                if (response?.json) {
+                    try {
+                        const body = await response.json();
+                        message = body?.error || message;
+                    } catch {
+                        // Keep the original Supabase function error message.
                     }
                 }
-            });
 
-            if (authError) {
-                // Rollback organization if auth fails
-                await supabase.from('organizations').delete().eq('id', orgData.id);
-                throw authError;
+                throw new Error(message);
             }
 
-            // 3. SUCCESS: show modal prompting the user to verify their email.
             setShowSuccess(true);
 
         } catch (err) {
