@@ -203,7 +203,15 @@ export async function recordPayment(
         };
     }
 
-    const amountInNaira = amount / 100;
+    // We store the student's intended payment amount in Paystack's metadata and read it here 
+    // instead of relying on Paystack's transaction amount field. If "Pass fees to customers" is enabled,
+    // Paystack's transaction amount includes the added processing fee (e.g. ₦203.50 instead of ₦200),
+    // which must not be credited to the student's due.
+    const metadataPaymentAmount = metadata?.payment_amount;
+    const amountInNaira =
+        typeof metadataPaymentAmount === 'number' && metadataPaymentAmount > 0
+            ? metadataPaymentAmount
+            : amount / 100;
     const totalPaid =
         previousPayments?.reduce(
             (sum, payment) => sum + (payment.amount_paid || 0),
@@ -258,7 +266,7 @@ export async function recordPayment(
         success: true,
         status: 200,
         data: {
-            amount,
+            amount: Math.round(amountInNaira * 100),
             reference,
             id: paymentData.id,
             status: paymentData.status,

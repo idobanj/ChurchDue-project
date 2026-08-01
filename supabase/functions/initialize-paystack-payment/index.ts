@@ -179,6 +179,7 @@ serve(async (req) => {
         metadata: {
           due_id: due.id,
           student_id: authUser.id,
+          payment_amount: requestedAmount,
         },
       }),
     })
