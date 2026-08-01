@@ -22,19 +22,19 @@
     }
 
     /* Keep autofilled inputs readable in dark mode (browsers force a white/yellow bg) */
-    input:-webkit-autofill,
-    input:-webkit-autofill:hover,
-    input:-webkit-autofill:focus,
-    textarea:-webkit-autofill,
-    select:-webkit-autofill {
+    .dark input:-webkit-autofill,
+    .dark input:-webkit-autofill:hover,
+    .dark input:-webkit-autofill:focus,
+    .dark textarea:-webkit-autofill,
+    .dark select:-webkit-autofill {
         -webkit-text-fill-color: #f3f4f6; /* gray-100 */
         -webkit-box-shadow: 0 0 0 1000px #374151 inset; /* gray-700 */
         caret-color: #f3f4f6;
         transition: background-color 5000s ease-in-out 0s;
     }
 
-    input:-webkit-autofill::placeholder,
-    textarea:-webkit-autofill::placeholder {
+    .dark input:-webkit-autofill::placeholder,
+    .dark textarea:-webkit-autofill::placeholder {
         -webkit-text-fill-color: #9ca3af; /* gray-400 */
     }
 }

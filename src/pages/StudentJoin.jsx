@@ -129,7 +129,7 @@ export default function StudentJoin() {
                                         fullName: e.target.value,
                                     })
                                 }
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder:-gray-400 dark:placeholder:gray-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-700'
+                                className='mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500'
                                 placeholder='John Doe'
                             />
                         </div>
@@ -147,7 +147,7 @@ export default function StudentJoin() {
                                         email: e.target.value,
                                     })
                                 }
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-800'
+                                className='mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500'
                                 placeholder='student@email.com'
                             />
                         </div>
@@ -165,7 +165,7 @@ export default function StudentJoin() {
                                         dateOfBirth: e.target.value,
                                     })
                                 }
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500'
+                                className='mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500'
                             />
                         </div>
                         <div>
@@ -182,7 +182,7 @@ export default function StudentJoin() {
                                         password: e.target.value,
                                     })
                                 }
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white text-gray-900 focus:outline focus:ring-primary-500 focus:border-primary-500'
+                                className='mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500'
                                 placeholder='Create password'
                             />
                         </div>
@@ -200,7 +200,7 @@ export default function StudentJoin() {
                                         confirmPassword: e.target.value,
                                     })
                                 }
-                                className='mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 focus:outline-none focus:ring-primary-500 focus:border-primary-500'
+                                className='mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500'
                                 placeholder='Confirm password'
                             />
                         </div>

@@ -132,7 +132,7 @@ export default function RefundModal({ due, totalPaid, onClose }) {
                 max={totalPaid}
                 step="0.01"
                 placeholder="Enter amount"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Maximum: ₦{totalPaid.toLocaleString()}
