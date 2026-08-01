@@ -21,7 +21,7 @@ export default function StudentDueDetails() {
         queryFn: async () => {
             const {data, error} = await supabase
                 .from('dues')
-                .select('*, payments(*)')
+                .select('*, payments(id, student_id, amount_paid, paid_at, status, reference:paystack_reference)')
                 .eq('id', id)
                 .single();
 
