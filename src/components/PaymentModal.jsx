@@ -75,17 +75,56 @@ export default function PaymentModal({ due, onClose }) {
       const { data: authData } = await supabase.auth.getUser();
       if (!authData?.user) throw new Error('Please sign in again.');
 
-      const handler = window.PaystackPop.setup({
-        key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
-        email: authData.user.email,
-        amount: Math.round(paymentAmount * 100),
-        currency: 'NGN',
-        metadata: { due_id: due.id, student_id: authData.user.id },
-        callback: handlePaystackSuccess,
-        onClose: () => setLoading(false),
+      const { data: initData, error: initError } = await supabase.functions.invoke('initialize-paystack-payment', {
+        body: {
+          due_id: due.id,
+          amount: paymentAmount,
+        },
       });
 
-      handler.openIframe();
+      if (initError) {
+        let message = initError.message;
+        const response = initError.context;
+
+        if (response?.json) {
+          try {
+            const body = await response.json();
+            message = body?.error || message;
+          } catch {
+            // Keep the original Supabase function error message.
+          }
+        }
+
+        throw new Error(message);
+      }
+
+      const accessCode = initData?.data?.access_code;
+      const fallbackReference = initData?.data?.reference;
+      if (!accessCode) throw new Error('Payment gateway did not return an access code.');
+
+      const paystack = typeof window.PaystackPop?.resumeTransaction === 'function'
+        ? window.PaystackPop
+        : typeof window.PaystackPop === 'function'
+          ? new window.PaystackPop()
+          : window.PaystackPop;
+
+      if (!paystack?.resumeTransaction) {
+        throw new Error('Payment gateway is not ready for server initialized payments.');
+      }
+
+      paystack.resumeTransaction(accessCode, {
+        onSuccess: (response) => {
+          handlePaystackSuccess({
+            ...response,
+            reference: response?.reference || fallbackReference,
+          });
+        },
+        onCancel: () => setLoading(false),
+        onError: (response) => {
+          setError(response?.message || 'Unable to load payment gateway.');
+          setLoading(false);
+        },
+      });
     } catch (err) {
       setError(err.message);
       setLoading(false);
